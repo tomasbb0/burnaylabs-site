@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎪 O Circo dos Comandos! - Command Circus!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #ff6b35 0%,
+          #f7c948 50%,
+          #ff6b35 100%
+        );
+        min-height: 100vh;
+        padding: 20px;
+        overflow-x: hidden;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .game-card {
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      .game-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: repeating-conic-gradient(#fff5e1 0% 25%, #fffbf0 25% 50%);
+        animation: circusSpin 30s linear infinite;
+        opacity: 0.3;
+        z-index: 0;
+      }
+      @keyframes circusSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .game-card > * {
+        position: relative;
+        z-index: 1;
+      }
+      h1 {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 4px;
+        color: #b91c1c;
+      }
+      h2 {
+        font-size: 1.1rem;
+        text-align: center;
+        color: #92400e;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      .stage {
+        background: linear-gradient(to bottom, #7c3aed 0%, #4c1d95 100%);
+        border-radius: 20px;
+        padding: 32px;
+        margin: 20px 0;
+        text-align: center;
+        position: relative;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .stage-curtain-left,
+      .stage-curtain-right {
+        position: absolute;
+        top: 0;
+        width: 40px;
+        height: 100%;
+        z-index: 2;
+      }
+      .stage-curtain-left {
+        left: 0;
+        background: linear-gradient(to right, #dc2626, transparent);
+        border-radius: 20px 0 0 20px;
+      }
+      .stage-curtain-right {
+        right: 0;
+        background: linear-gradient(to left, #dc2626, transparent);
+        border-radius: 0 20px 20px 0;
+      }
+      .stage-lights {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: linear-gradient(
+          90deg,
+          #fbbf24,
+          #f59e0b,
+          #fbbf24,
+          #f59e0b,
+          #fbbf24
+        );
+        border-radius: 20px 20px 0 0;
+        animation: lightsFlash 1.5s ease-in-out infinite alternate;
+      }
+      @keyframes lightsFlash {
+        from {
+          opacity: 0.6;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .character {
+        font-size: 6rem;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation: bounce 2s ease-in-out infinite;
+      }
+      .character.action {
+        animation: none;
+      }
+      .character.jump {
+        animation: jumpAnim 0.6s ease-out;
+      }
+      .character.clap {
+        animation: clapAnim 0.4s ease-in-out 3;
+      }
+      .character.sit {
+        transform: translateY(30px) scaleY(0.7);
+      }
+      .character.stand {
+        transform: translateY(0) scaleY(1);
+        animation: standUp 0.5s ease-out;
+      }
+      .character.look {
+        animation: lookAround 0.8s ease-in-out 2;
+      }
+      .character.listen {
+        animation: listenAnim 0.6s ease-in-out 2;
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      @keyframes jumpAnim {
+        0% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-60px) scale(1.1);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+      @keyframes clapAnim {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15) rotate(5deg);
+        }
+      }
+      @keyframes standUp {
+        0% {
+          transform: translateY(30px) scaleY(0.7);
+        }
+        100% {
+          transform: translateY(0) scaleY(1);
+        }
+      }
+      @keyframes lookAround {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        25% {
+          transform: rotate(-15deg);
+        }
+        75% {
+          transform: rotate(15deg);
+        }
+      }
+      @keyframes listenAnim {
+        0%,
+        100% {
+          transform: scale(1) rotate(0);
+        }
+        50% {
+          transform: scale(1.05) rotate(-5deg);
+        }
+      }
+      .command-text {
+        color: white;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-top: 16px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+      .command-english {
+        color: #c4b5fd;
+        font-size: 1rem;
+        margin-top: 4px;
+      }
+      .instruction {
+        background: #fef3c7;
+        border: 3px dashed #f59e0b;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .instruction-text {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #92400e;
+      }
+      .instruction-hint {
+        font-size: 0.95rem;
+        color: #b45309;
+        margin-top: 4px;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .answer-btn {
+        padding: 18px;
+        font-size: 1.15rem;
+        font-weight: 700;
+        border: 3px solid #e5e7eb;
+        border-radius: 16px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+        position: relative;
+        overflow: hidden;
+      }
+      .answer-btn:hover {
+        border-color: #f59e0b;
+        background: #fef3c7;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .answer-btn.correct {
+        background: #d1fae5;
+        border-color: #10b981;
+        animation: correctPop 0.4s ease;
+      }
+      .answer-btn.wrong {
+        background: #fee2e2;
+        border-color: #ef4444;
+        animation: wrongShake 0.4s ease;
+      }
+      @keyframes correctPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .progress-bar {
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 6px;
+        margin: 16px 0 8px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #f59e0b, #ef4444, #ec4899);
+        border-radius: 6px;
+        transition: width 0.5s ease;
+      }
+      .score-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .stars {
+        font-size: 1.4rem;
+      }
+      .level-badge {
+        background: linear-gradient(135deg, #dc2626, #f59e0b);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 0.9rem;
+      }
+      .celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .celebration-content {
+        background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+        border-radius: 24px;
+        padding: 48px;
+        text-align: center;
+        max-width: 500px;
+        color: white;
+        animation: celebPop 0.5s ease;
+      }
+      @keyframes celebPop {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .celebration h2 {
+        font-size: 2rem;
+        margin: 16px 0;
+        color: white;
+      }
+      .celebration .emoji {
+        font-size: 5rem;
+      }
+      .play-btn {
+        background: white;
+        color: #dc2626;
+        border: none;
+        padding: 16px 48px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 16px;
+        transition: transform 0.2s;
+      }
+      .play-btn:hover {
+        transform: scale(1.05);
+      }
+      .hidden {
+        display: none !important;
+      }
+      .confetti {
+        position: fixed;
+        top: -10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        z-index: 150;
+        animation: confettiFall linear forwards;
+        pointer-events: none;
+      }
+      @keyframes confettiFall {
+        to {
+          top: 110vh;
+          transform: rotate(720deg);
+        }
+      }
+      .success-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .success-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .failure-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #ef4444, #f97316);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .failure-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .ticket-counter {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin: 12px 0;
+      }
+      .ticket {
+        width: 40px;
+        height: 40px;
+        background: #f59e0b;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        transition: all 0.3s;
+        opacity: 0.25;
+      }
+      .ticket.earned {
+        opacity: 1;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        animation: ticketPop 0.5s ease;
+      }
+      @keyframes ticketPop {
+        0% {
+          transform: scale(0.5) rotate(-10deg);
+        }
+        50% {
+          transform: scale(1.2) rotate(5deg);
+        }
+        100% {
+          transform: scale(1.1) rotate(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-card">
+        <h1>🎪 O Circo dos Comandos!</h1>
+        <h2>The Command Circus! — Learn Portuguese action words</h2>
+
+        <div class="score-row">
+          <span class="stars" id="stars">⭐⭐⭐⭐⭐</span>
+          <span class="level-badge" id="level">Act 1</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress" style="width: 0%"></div>
+        </div>
+
+        <div class="ticket-counter" id="tickets">
+          <div class="ticket" id="ticket-0">🎫</div>
+          <div class="ticket" id="ticket-1">🎫</div>
+          <div class="ticket" id="ticket-2">🎫</div>
+          <div class="ticket" id="ticket-3">🎫</div>
+          <div class="ticket" id="ticket-4">🎫</div>
+          <div class="ticket" id="ticket-5">🎫</div>
+        </div>
+
+        <div class="stage" id="stage">
+          <div class="stage-lights"></div>
+          <div class="stage-curtain-left"></div>
+          <div class="stage-curtain-right"></div>
+          <div class="character" id="character">🤡</div>
+          <div class="command-text" id="command-text"></div>
+          <div class="command-english" id="command-english"></div>
+        </div>
+
+        <div class="instruction" id="instruction-box">
+          <div class="instruction-text" id="instruction">
+            What does the clown need to do?
+          </div>
+          <div class="instruction-hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+      </div>
+    </div>
+
+    <div class="celebration hidden" id="celebration">
+      <div class="celebration-content">
+        <div class="emoji">🎪🎉🤡</div>
+        <h2>Bravo, Bravo!</h2>
+        <p style="font-size: 1.1rem">
+          O espetáculo foi fantástico!<br />The show was fantastic!
+        </p>
+        <p
+          style="margin-top: 12px; font-size: 0.95rem; opacity: 0.9"
+          id="final-score"
+        ></p>
+        <button class="play-btn" onclick="location.reload()">
+          🎪 Novo Espetáculo / New Show
+        </button>
+      </div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      const levels = [
+        {
+          theme: "Comandos Básicos",
+          questions: [
+            {
+              emoji: "🤡",
+              command: "Olha!",
+              english: "Look!",
+              animation: "look",
+              q: "O palhaço precisa de...",
+              hint: "The clown needs to...",
+              answer: "Olhar",
+              options: ["Olhar", "Saltar", "Sentar", "Bater palmas"],
+            },
+            {
+              emoji: "🤡",
+              command: "Ouve!",
+              english: "Listen!",
+              animation: "listen",
+              q: "O palhaço precisa de...",
+              hint: "The clown needs to...",
+              answer: "Ouvir",
+              options: ["Correr", "Ouvir", "Dançar", "Cantar"],
+            },
+            {
+              emoji: "🤡",
+              command: "Bate palmas!",
+              english: "Clap your hands!",
+              animation: "clap",
+              q: "O palhaço precisa de...",
+              hint: "The clown needs to...",
+              answer: "Bater palmas",
+              options: ["Saltar", "Bater palmas", "Olhar", "Sentar"],
+            },
+          ],
+        },
+        {
+          theme: "Ações do Corpo",
+          questions: [
+            {
+              emoji: "🤸",
+              command: "Salta!",
+              english: "Jump!",
+              animation: "jump",
+              q: "O acrobata precisa de...",
+              hint: "The acrobat needs to...",
+              answer: "Saltar",
+              options: ["Sentar", "Olhar", "Saltar", "Ouvir"],
+            },
+            {
+              emoji: "🧘",
+              command: "Senta-te!",
+              english: "Sit down!",
+              animation: "sit",
+              q: "O artista precisa de...",
+              hint: "The artist needs to...",
+              answer: "Sentar-se",
+              options: ["Levantar-se", "Sentar-se", "Correr", "Saltar"],
+            },
+            {
+              emoji: "🧍",
+              command: "Levanta-te!",
+              english: "Stand up!",
+              animation: "stand",
+              q: "O artista precisa de...",
+              hint: "The artist needs to...",
+              answer: "Levantar-se",
+              options: ["Sentar-se", "Bater palmas", "Levantar-se", "Ouvir"],
+            },
+          ],
+        },
+        {
+          theme: "No Circo",
+          questions: [
+            {
+              emoji: "🎪",
+              command: "Olha para mim!",
+              english: "Look at me!",
+              animation: "look",
+              q: "O malabarista diz...",
+              hint: "The juggler says...",
+              answer: "Olha para mim!",
+              options: ["Senta-te!", "Olha para mim!", "Ouve!", "Levanta-te!"],
+            },
+            {
+              emoji: "🎵",
+              command: "Ouve a música!",
+              english: "Listen to the music!",
+              animation: "listen",
+              q: "O maestro diz...",
+              hint: "The conductor says...",
+              answer: "Ouve a música!",
+              options: ["Bate palmas!", "Salta!", "Ouve a música!", "Olha!"],
+            },
+            {
+              emoji: "👏",
+              command: "Bate palmas!",
+              english: "Clap your hands!",
+              animation: "clap",
+              q: "O público precisa de...",
+              hint: "The audience needs to...",
+              answer: "Bater palmas",
+              options: ["Bater palmas", "Sentar", "Ouvir", "Olhar"],
+            },
+          ],
+        },
+        {
+          theme: "Simão Diz",
+          questions: [
+            {
+              emoji: "🎩",
+              command: "Simão diz: Salta!",
+              english: "Simon says: Jump!",
+              animation: "jump",
+              q: "O que tens de fazer?",
+              hint: "What do you need to do?",
+              answer: "Saltar",
+              options: ["Sentar", "Saltar", "Bater palmas", "Ouvir"],
+            },
+            {
+              emoji: "🎩",
+              command: "Simão diz: Senta-te!",
+              english: "Simon says: Sit down!",
+              animation: "sit",
+              q: "O que tens de fazer?",
+              hint: "What do you need to do?",
+              answer: "Sentar",
+              options: ["Saltar", "Levantar", "Olhar", "Sentar"],
+            },
+            {
+              emoji: "🎩",
+              command: "Simão diz: Levanta-te!",
+              english: "Simon says: Stand up!",
+              animation: "stand",
+              q: "O que tens de fazer?",
+              hint: "What do you need to do?",
+              answer: "Levantar",
+              options: ["Sentar", "Ouvir", "Levantar", "Bater palmas"],
+            },
+          ],
+        },
+        {
+          theme: "Desafio Rápido",
+          questions: [
+            {
+              emoji: "⚡",
+              command: "Rápido! Bate palmas!",
+              english: "Quick! Clap!",
+              animation: "clap",
+              q: "Depressa! O que fazes?",
+              hint: "Quickly! What do you do?",
+              answer: "Bater palmas",
+              options: ["Bater palmas", "Saltar", "Sentar", "Olhar"],
+            },
+            {
+              emoji: "⚡",
+              command: "Rápido! Salta!",
+              english: "Quick! Jump!",
+              animation: "jump",
+              q: "Depressa! O que fazes?",
+              hint: "Quickly! What do you do?",
+              answer: "Saltar",
+              options: ["Ouvir", "Olhar", "Saltar", "Levantar"],
+            },
+            {
+              emoji: "⚡",
+              command: "Rápido! Olha!",
+              english: "Quick! Look!",
+              animation: "look",
+              q: "Depressa! O que fazes?",
+              hint: "Quickly! What do you do?",
+              answer: "Olhar",
+              options: ["Sentar", "Saltar", "Bater palmas", "Olhar"],
+            },
+          ],
+        },
+        {
+          theme: "O Grande Final",
+          questions: [
+            {
+              emoji: "🌟",
+              command: "Todos: Bate palmas!",
+              english: "Everyone: Clap!",
+              animation: "clap",
+              q: "O apresentador pede para...",
+              hint: "The host asks to...",
+              answer: "Bater palmas",
+              options: ["Bater palmas", "Sentar", "Dormir", "Correr"],
+            },
+            {
+              emoji: "🌟",
+              command: "Todos: Salta!",
+              english: "Everyone: Jump!",
+              animation: "jump",
+              q: "O apresentador pede para...",
+              hint: "The host asks to...",
+              answer: "Saltar",
+              options: ["Ouvir", "Olhar", "Saltar", "Levantar"],
+            },
+            {
+              emoji: "🌟",
+              command: "Todos: Levanta-te e bate palmas!",
+              english: "Everyone: Stand up and clap!",
+              animation: "stand",
+              q: "O que fazemos?",
+              hint: "What do we do?",
+              answer: "Levantar e bater palmas",
+              options: [
+                "Sentar e ouvir",
+                "Levantar e bater palmas",
+                "Saltar e correr",
+                "Olhar e sentar",
+              ],
+            },
+          ],
+        },
+      ];
+
+      let currentLevel = 0,
+        currentQ = 0,
+        stars = 5,
+        tickets = 0,
+        totalQuestions = 18,
+        answeredQuestions = 0;
+
+      function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+      }
+
+      function animateCharacter(anim) {
+        const char = document.getElementById("character");
+        char.classList.remove("jump", "clap", "sit", "stand", "look", "listen");
+        char.classList.add("action");
+        void char.offsetWidth;
+        char.classList.add(anim);
+      }
+
+      function showQuestion() {
+        const level = levels[currentLevel];
+        const q = level.questions[currentQ];
+        document.getElementById("level").textContent =
+          "Act " + (currentLevel + 1) + ": " + level.theme;
+        document.getElementById("character").textContent = q.emoji;
+        document.getElementById("character").className = "character";
+        document.getElementById("command-text").textContent = q.command;
+        document.getElementById("command-english").textContent = q.english;
+        document.getElementById("instruction").textContent = q.q;
+        document.getElementById("hint").textContent = q.hint;
+        document.getElementById("progress").style.width =
+          (answeredQuestions / totalQuestions) * 100 + "%";
+
+        const answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        shuffle(q.options).forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "answer-btn";
+          btn.textContent = opt;
+          btn.disabled = false;
+          btn.onclick = () => checkAnswer(opt, q.answer, btn, q.animation);
+          answersDiv.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected, correct, btn, animation) {
+        const btns = document.querySelectorAll(".answer-btn");
+        btns.forEach((b) => (b.disabled = true));
+        answeredQuestions++;
+
+        if (selected === correct) {
+          btn.classList.add("correct");
+          animateCharacter(animation);
+          setTimeout(() => nextQuestion(), 1200);
+          try {
+            playCheerSound();
+          } catch (e) {}
+          try {
+            showSuccessSplash("Bravo! 🎪");
+          } catch (e) {}
+        } else {
+          btn.classList.add("wrong");
+          setTimeout(() => nextQuestion(), 1500);
+          try {
+            playOhSound();
+          } catch (e) {}
+          stars = Math.max(0, stars - 1);
+          document.getElementById("stars").textContent =
+            "⭐".repeat(stars) + "☆".repeat(5 - stars);
+          btns.forEach((b) => {
+            if (b.textContent === correct) b.classList.add("correct");
+          });
+          try {
+            showFailureSplash("Tenta outra vez! 😅");
+          } catch (e) {}
+        }
+      }
+
+      function nextQuestion() {
+        currentQ++;
+        if (currentQ >= levels[currentLevel].questions.length) {
+          document
+            .getElementById("ticket-" + currentLevel)
+            .classList.add("earned");
+          tickets++;
+          try {
+            playPling();
+          } catch (e) {}
+          currentLevel++;
+          currentQ = 0;
+          if (currentLevel >= levels.length) {
+            // Save completion to cloud
+            if (window.GameFirebase && window.GameFirebase.ready) {
+              window.GameFirebase.saveProgress({ completed: true, stars: stars, tickets: tickets, levelsCompleted: currentLevel });
+            }
+            launchConfetti();
+            setTimeout(() => {
+              document.getElementById("final-score").textContent =
+                "Bilhetes: " + tickets + "/6 | Estrelas: " + stars + "/5";
+              document.getElementById("celebration").classList.remove("hidden");
+            }, 500);
+            return;
+          }
+        }
+        showQuestion();
+      }
+
+      function launchConfetti() {
+        const colors = [
+          "#EF4444",
+          "#F59E0B",
+          "#10B981",
+          "#3B82F6",
+          "#8B5CF6",
+          "#EC4899",
+        ];
+        for (let i = 0; i < 60; i++) {
+          setTimeout(() => {
+            const c = document.createElement("div");
+            c.className = "confetti";
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.background =
+              colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDuration = 2 + Math.random() * 3 + "s";
+            c.style.width = 6 + Math.random() * 8 + "px";
+            c.style.height = 6 + Math.random() * 8 + "px";
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 5000);
+          }, i * 50);
+        }
+      }
+
+      function getAudioContext() {
+        try {
+          return (
+            window._audioCtx ||
+            (window._audioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )())
+          );
+        } catch (e) {
+          return null;
+        }
+      }
+      function playCheerSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        [1046, 1319, 1568].forEach((f, i) => {
+          const o = ctx.createOscillator(),
+            g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(f, now + i * 0.05);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + i * 0.05);
+          o.stop(now + 0.55);
+        });
+      }
+      function playOhSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(350, now);
+        o.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.7);
+      }
+      function playPling() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "triangle";
+        o.frequency.setValueAtTime(1320, now);
+        o.frequency.exponentialRampToValueAtTime(660, now + 0.12);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.28);
+      }
+      function showSuccessSplash(text) {
+        const s = document.createElement("div");
+        s.className = "success-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 800);
+      }
+      function showFailureSplash(text) {
+        const s = document.createElement("div");
+        s.className = "failure-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 1200);
+      }
+
+      showQuestion();
+    </script>
+  </body>
+</html>

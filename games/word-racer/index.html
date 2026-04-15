@@ -1,0 +1,3323 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Word Racer 🏎️ — Corrida das Palavras!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: #0f0f1a;
+        color: #fff;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      /* === SCREENS === */
+      .screen {
+        display: none;
+        position: fixed;
+        inset: 0;
+        flex-direction: column;
+        z-index: 1;
+      }
+      .screen.active {
+        display: flex;
+      }
+
+      /* === TEST BANNER === */
+      .test-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background: #f59e0b;
+        color: #000;
+        text-align: center;
+        font-weight: 800;
+        font-size: 0.85rem;
+        padding: 4px;
+        letter-spacing: 1px;
+      }
+
+      /* === INTRO === */
+      .intro {
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at 50% 40%, #1a1a3e, #0f0f1a);
+        text-align: center;
+        gap: 16px;
+      }
+      .intro h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #00d4ff, #ff6b35);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+      }
+      .intro .subtitle {
+        font-size: 1.1rem;
+        color: #aaa;
+        margin-top: -8px;
+      }
+      .intro .stats-bar {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        font-size: 1rem;
+        color: #ccc;
+        margin: 8px 0;
+      }
+      .intro .stats-bar span {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 6px 14px;
+        border-radius: 20px;
+      }
+      .start-btn {
+        background: linear-gradient(135deg, #00d4ff, #0090ff);
+        color: #fff;
+        border: none;
+        padding: 16px 48px;
+        border-radius: 50px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        margin-top: 12px;
+        box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+        transition: transform 0.15s;
+      }
+      .start-btn:active {
+        transform: scale(0.95);
+      }
+      .car-anim {
+        font-size: 4rem;
+        animation: carBounce 1.5s ease-in-out infinite;
+        display: inline-block;
+        transform: scaleX(-1);
+      }
+      @keyframes carBounce {
+        0%,
+        100% {
+          transform: scaleX(-1) translateY(0);
+        }
+        50% {
+          transform: scaleX(-1) translateY(-12px);
+        }
+      }
+
+      /* === SELECT === */
+      .select {
+        background: #0f0f1a;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .select-header {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .select-header h2 {
+        font-size: 1.1rem;
+        font-weight: 800;
+      }
+      .select-header .stats-row {
+        display: flex;
+        gap: 12px;
+        font-size: 0.85rem;
+        color: #aaa;
+      }
+      .back-btn {
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 1.2rem;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .shop-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      /* Badge print styles */
+      .badge-print-btn {
+        background: rgba(0, 255, 136, 0.15);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        color: #00ff88;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 6px;
+      }
+      @media print {
+        .screen {
+          display: none !important;
+        }
+        #badge-print-area {
+          display: block !important;
+        }
+      }
+      #badge-print-area {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #fff;
+        color: #000;
+        padding: 40px;
+        text-align: center;
+        font-family: "Nunito", sans-serif;
+      }
+      #badge-print-area .badge-card {
+        display: inline-block;
+        border: 4px solid #ffd700;
+        border-radius: 20px;
+        padding: 30px 40px;
+        margin: 20px;
+        text-align: center;
+        min-width: 250px;
+      }
+      #badge-print-area .badge-card .badge-emoji {
+        font-size: 4rem;
+      }
+      #badge-print-area .badge-card .badge-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 8px 0 4px;
+      }
+      #badge-print-area .badge-card .badge-sub {
+        font-size: 0.9rem;
+        color: #666;
+      }
+      #badge-print-area .badge-card .badge-stars {
+        font-size: 2rem;
+        margin-top: 8px;
+      }
+      .race-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 16px;
+      }
+      .race-card {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+      .race-card:active {
+        transform: scale(0.97);
+      }
+      .race-card .icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+        width: 44px;
+        text-align: center;
+      }
+      .race-card .race-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .race-card .name {
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+      .race-card .name-en {
+        font-size: 0.7rem;
+        color: #aaa;
+      }
+      .race-card .race-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+      .race-card .stars-row {
+        font-size: 1rem;
+        letter-spacing: 2px;
+      }
+      .race-card .record {
+        font-size: 0.65rem;
+        color: #888;
+      }
+      .race-card.locked {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+      .section-label {
+        padding: 16px 16px 4px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #aaa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* === COUNTDOWN === */
+      .countdown {
+        align-items: center;
+        justify-content: center;
+        background: #0f0f1a;
+      }
+      .countdown-num {
+        font-size: 8rem;
+        font-weight: 900;
+        animation: countPop 0.4s ease;
+      }
+      @keyframes countPop {
+        0% {
+          transform: scale(2);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* === GAME === */
+      .game {
+        background: #0f0f1a;
+        flex-direction: column;
+      }
+      .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 14px;
+        background: rgba(255, 255, 255, 0.04);
+        font-size: 0.85rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .game-header .timer {
+        color: #00d4ff;
+        font-variant-numeric: tabular-nums;
+      }
+      .game-header .progress {
+        color: #aaa;
+      }
+      .exercise-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        min-height: 0;
+        overflow-y: auto;
+      }
+      .exercise-type-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #aaa;
+        margin-bottom: 8px;
+      }
+      .exercise-prompt {
+        font-size: 1.6rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 16px;
+        line-height: 1.3;
+      }
+      .exercise-emoji {
+        font-size: 4rem;
+        margin-bottom: 12px;
+      }
+
+      /* Option grids */
+      .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+        max-width: 400px;
+      }
+      .option-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 14px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+        text-align: center;
+      }
+      .option-btn:active {
+        transform: scale(0.95);
+      }
+      .option-btn.correct {
+        background: rgba(0, 255, 136, 0.2);
+        border-color: #00ff88;
+        animation: optionPop 0.3s ease;
+      }
+      .option-btn.wrong {
+        background: rgba(255, 50, 50, 0.2);
+        border-color: #ff3232;
+        animation: shake 0.3s ease;
+      }
+      .option-btn.emoji-opt {
+        font-size: 2.4rem;
+        padding: 16px;
+      }
+      @keyframes optionPop {
+        0% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-6px);
+        }
+        75% {
+          transform: translateX(6px);
+        }
+      }
+
+      /* Speak exercise */
+      .speak-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      .mic-btn {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6b35, #ff3232);
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+        transition: all 0.2s;
+      }
+      .mic-btn.listening {
+        animation: micPulse 1s ease infinite;
+        background: linear-gradient(135deg, #00ff88, #00d4ff);
+      }
+      .mic-btn.done {
+        background: #444;
+        opacity: 0.6;
+      }
+      @keyframes micPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 20px rgba(0, 255, 136, 0);
+        }
+      }
+      .speak-word {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #00d4ff;
+      }
+      .speak-heard {
+        font-size: 0.85rem;
+        color: #aaa;
+        min-height: 20px;
+        margin-top: 4px;
+      }
+      .speak-skip {
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #aaa;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 8px;
+      }
+
+      /* Build exercise */
+      .build-hint {
+        font-size: 1rem;
+        color: #aaa;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .build-slots {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+        min-height: 50px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        width: 100%;
+        max-width: 420px;
+        margin-bottom: 16px;
+      }
+      .build-slot {
+        background: rgba(0, 212, 255, 0.15);
+        border: 2px solid rgba(0, 212, 255, 0.3);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #00d4ff;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .build-slot:active {
+        transform: scale(0.9);
+      }
+      .build-slot.empty {
+        background: rgba(255, 255, 255, 0.03);
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+        color: transparent;
+        min-width: 50px;
+        pointer-events: none;
+      }
+      .build-tiles {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        max-width: 420px;
+      }
+      .build-tile {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .build-tile:active {
+        transform: scale(0.9);
+      }
+      .build-tile.used {
+        opacity: 0.2;
+        pointer-events: none;
+      }
+      .build-result {
+        margin-top: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        min-height: 24px;
+      }
+      .build-result.correct {
+        color: #00ff88;
+      }
+      .build-result.wrong {
+        color: #ff3232;
+      }
+
+      /* Play audio button */
+      .play-audio-btn {
+        background: rgba(0, 212, 255, 0.15);
+        border: 2px solid rgba(0, 212, 255, 0.3);
+        border-radius: 50%;
+        width: 64px;
+        height: 64px;
+        font-size: 1.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .play-audio-btn:active {
+        transform: scale(0.9);
+      }
+      .play-audio-btn.playing {
+        animation: audioPulse 0.6s ease infinite;
+      }
+      @keyframes audioPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 0 12px rgba(0, 212, 255, 0);
+        }
+      }
+
+      /* === RACE TRACK === */
+      .race-track {
+        flex-shrink: 0;
+        padding: 0 16px 12px;
+        position: relative;
+      }
+      .track-road {
+        position: relative;
+        height: 48px;
+        background: #333;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 2px solid #444;
+      }
+      .track-road::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 8px;
+        right: 8px;
+        height: 2px;
+        background: repeating-linear-gradient(
+          90deg,
+          #666 0,
+          #666 12px,
+          transparent 12px,
+          transparent 24px
+        );
+      }
+      .track-car {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%) scaleX(-1);
+        font-size: 1.6rem;
+        transition: left 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+        left: 2%;
+      }
+      .track-flag {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+      }
+      .track-checkpoints {
+        position: absolute;
+        top: 50%;
+        left: 5%;
+        right: 10%;
+        display: flex;
+        justify-content: space-between;
+        transform: translateY(-50%);
+      }
+      .track-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #555;
+        transition: background 0.3s;
+      }
+      .track-dot.passed {
+        background: #00ff88;
+      }
+      .track-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 4px 0;
+        font-size: 0.75rem;
+        color: #888;
+      }
+
+      /* === RESULTS === */
+      .results {
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at 50% 30%, #1a1a3e, #0f0f1a);
+        text-align: center;
+        gap: 12px;
+        padding: 24px;
+      }
+      .results h2 {
+        font-size: 1.8rem;
+        font-weight: 900;
+      }
+      .results-stars {
+        font-size: 3rem;
+        letter-spacing: 8px;
+        margin: 8px 0;
+      }
+      .tier-badge {
+        display: inline-block;
+        padding: 8px 24px;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin: 4px 0;
+      }
+      .tier-bronze {
+        background: linear-gradient(135deg, #cd7f32, #a0522d);
+        color: #fff;
+      }
+      .tier-silver {
+        background: linear-gradient(135deg, #c0c0c0, #909090);
+        color: #fff;
+      }
+      .tier-gold {
+        background: linear-gradient(135deg, #ffd700, #daa520);
+        color: #000;
+      }
+      .tier-diamond {
+        background: linear-gradient(135deg, #b9f2ff, #00d4ff);
+        color: #000;
+      }
+      .results-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+        max-width: 300px;
+        font-size: 0.85rem;
+      }
+      .stat-box {
+        background: rgba(255, 255, 255, 0.06);
+        padding: 10px;
+        border-radius: 10px;
+      }
+      .stat-box .val {
+        font-size: 1.3rem;
+        font-weight: 800;
+      }
+      .stat-box .label {
+        font-size: 0.7rem;
+        color: #aaa;
+      }
+      .diamonds-earned {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #00d4ff;
+        margin: 4px 0;
+      }
+      .record-badge {
+        background: rgba(255, 215, 0, 0.15);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #ffd700;
+        font-weight: 700;
+        display: none;
+      }
+      .record-badge.show {
+        display: inline-block;
+        animation: recordPop 0.5s ease;
+      }
+      @keyframes recordPop {
+        0% {
+          transform: scale(1.4);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .results-btns {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .res-btn {
+        border: none;
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: transform 0.15s;
+      }
+      .res-btn:active {
+        transform: scale(0.95);
+      }
+      .res-btn.primary {
+        background: linear-gradient(135deg, #00d4ff, #0090ff);
+        color: #fff;
+      }
+      .res-btn.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+      }
+
+      /* === SHOP === */
+      .shop {
+        background: #0f0f1a;
+        overflow-y: auto;
+      }
+      .shop-header {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .shop-header h2 {
+        font-size: 1.1rem;
+        font-weight: 800;
+      }
+      .puzzle-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+        padding: 16px;
+      }
+      .puzzle-card {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 14px;
+        text-align: center;
+      }
+      .puzzle-card .pz-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .puzzle-grid-mini {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+        margin-bottom: 8px;
+      }
+      .pz-piece {
+        aspect-ratio: 1;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+      .pz-piece.owned {
+        background: rgba(0, 255, 136, 0.15);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+      }
+      .pz-piece.locked {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: #555;
+        font-size: 0.7rem;
+        cursor: pointer;
+      }
+      .pz-piece.locked:active {
+        transform: scale(0.9);
+      }
+      .puzzle-card .pz-progress {
+        font-size: 0.7rem;
+        color: #aaa;
+        margin-top: 4px;
+      }
+      .puzzle-complete {
+        font-size: 0.75rem;
+        color: #00ff88;
+        font-weight: 700;
+      }
+
+      /* === FEEDBACK OVERLAY === */
+      .feedback {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .feedback.show {
+        display: flex;
+      }
+      .feedback .fb-icon {
+        font-size: 5rem;
+        animation: fbPop 0.5s ease;
+      }
+      @keyframes fbPop {
+        0% {
+          transform: scale(0) rotate(-20deg);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.2) rotate(5deg);
+        }
+        100% {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      /* === RESPONSIVE === */
+      @media (max-width: 400px) {
+        .intro h1 {
+          font-size: 2.2rem;
+        }
+        .exercise-emoji {
+          font-size: 3rem;
+        }
+        .option-btn {
+          padding: 10px;
+          font-size: 1rem;
+        }
+        .option-btn.emoji-opt {
+          font-size: 1.8rem;
+          padding: 12px;
+        }
+        .race-grid {
+          gap: 6px;
+          padding: 8px 12px;
+        }
+      }
+      @media (min-height: 800px) {
+        .exercise-area {
+          padding: 24px;
+        }
+        .exercise-emoji {
+          font-size: 5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TEST MODE BANNER -->
+    <div class="test-banner" id="test-banner" style="display: none">
+      🧪 TEACHER TEST — Progress saved separately
+    </div>
+
+    <!-- INTRO SCREEN -->
+    <div class="screen intro active" id="screen-intro">
+      <div class="car-anim">🏎️</div>
+      <h1>Word Racer</h1>
+      <p class="subtitle">Corrida das Palavras!</p>
+      <div class="stats-bar">
+        <span>⭐ <span id="intro-stars">0</span></span>
+        <span>💎 <span id="intro-diamonds">0</span></span>
+      </div>
+      <button
+        class="start-btn"
+        onclick="
+          unlockAudio();
+          showSelect();
+        "
+      >
+        START! 🏁
+      </button>
+      <button
+        onclick="goScreen('settings')"
+        style="
+          background: none;
+          border: none;
+          color: #666;
+          font-size: 1.2rem;
+          cursor: pointer;
+          margin-top: 16px;
+          font-family: inherit;
+        "
+      >
+        ⚙️ Settings
+      </button>
+    </div>
+
+    <!-- SELECT SCREEN -->
+    <div class="screen select" id="screen-select">
+      <div class="select-header">
+        <button class="back-btn" onclick="showIntro()">←</button>
+        <h2>Choose Your Race!</h2>
+        <div class="stats-row">
+          <span>⭐ <span id="sel-stars">0</span></span>
+          <span>💎 <span id="sel-diamonds">0</span></span>
+        </div>
+        <button class="shop-btn" onclick="showShop()">🏅 Badges</button>
+      </div>
+      <div id="race-list"></div>
+    </div>
+
+    <!-- COUNTDOWN SCREEN -->
+    <div class="screen countdown" id="screen-countdown">
+      <div class="countdown-num" id="countdown-num">3</div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div class="screen game" id="screen-game">
+      <div class="game-header">
+        <span class="timer" id="game-timer">⏱ 0:00</span>
+        <span id="game-race-name"></span>
+        <span class="progress" id="game-progress">1/10</span>
+      </div>
+      <div class="exercise-area" id="exercise-area"></div>
+      <div class="race-track">
+        <div class="track-road">
+          <div class="track-car" id="track-car">🏎️</div>
+          <div class="track-checkpoints" id="track-checkpoints"></div>
+          <div class="track-flag">🏁</div>
+        </div>
+        <div class="track-info">
+          <span id="track-score">Score: 0</span>
+          <span id="track-time"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div class="screen results" id="screen-results">
+      <h2 id="results-title">🏁 Race Complete!</h2>
+      <div class="results-stars" id="results-stars"></div>
+      <div id="results-tier"></div>
+      <div class="results-stats" id="results-stats"></div>
+      <div class="diamonds-earned" id="results-diamonds"></div>
+      <div class="record-badge" id="results-record">🏆 NEW RECORD!</div>
+      <div class="results-btns">
+        <button class="res-btn secondary" onclick="showSelect()">
+          ← Races
+        </button>
+        <button class="res-btn primary" onclick="replayRace()">
+          Race Again 🏎️
+        </button>
+      </div>
+    </div>
+
+    <!-- SHOP SCREEN -->
+    <div class="screen shop" id="screen-shop">
+      <div class="shop-header">
+        <button class="back-btn" onclick="showSelect()">←</button>
+        <h2>🏅 Badge Shop</h2>
+        <span>💎 <span id="shop-diamonds">0</span></span>
+      </div>
+      <div class="puzzle-list" id="puzzle-list"></div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div
+      class="screen"
+      id="screen-settings"
+      style="background: #0f0f1a; overflow-y: auto"
+    >
+      <div class="shop-header">
+        <button class="back-btn" onclick="showIntro()">←</button>
+        <h2>⚙️ Settings</h2>
+        <span></span>
+      </div>
+      <div
+        style="
+          padding: 24px;
+          max-width: 400px;
+          margin: 0 auto;
+          text-align: center;
+        "
+      >
+        <h3 style="font-size: 1rem; margin-bottom: 16px; color: #aaa">
+          Progress
+        </h3>
+        <p style="font-size: 0.85rem; color: #888; margin-bottom: 16px">
+          Reset all race results, stars, and diamonds. This cannot be undone!
+        </p>
+        <button
+          onclick="confirmReset()"
+          style="
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+          "
+        >
+          🗑️ Reset All Progress
+        </button>
+        <div id="reset-confirm" style="display: none; margin-top: 16px">
+          <p
+            style="
+              color: #fbbf24;
+              font-size: 0.9rem;
+              font-weight: 700;
+              margin-bottom: 10px;
+            "
+          >
+            Are you sure? Type RESET to confirm:
+          </p>
+          <input
+            id="reset-input"
+            type="text"
+            placeholder="Type RESET"
+            style="
+              padding: 10px;
+              border: 2px solid #444;
+              border-radius: 10px;
+              background: #222;
+              color: #fff;
+              font-family: inherit;
+              font-size: 1rem;
+              width: 200px;
+              text-align: center;
+            "
+          />
+          <button
+            onclick="doReset()"
+            style="
+              display: block;
+              margin: 12px auto 0;
+              background: #dc2626;
+              color: #fff;
+              border: none;
+              padding: 10px 24px;
+              border-radius: 20px;
+              font-size: 0.9rem;
+              font-weight: 700;
+              cursor: pointer;
+              font-family: inherit;
+            "
+          >
+            Confirm Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BADGE PRINT AREA (hidden, shown for printing) -->
+    <div id="badge-print-area"></div>
+
+    <!-- FEEDBACK OVERLAY -->
+    <div class="feedback" id="feedback">
+      <div class="fb-icon" id="fb-icon"></div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      // ═══════════════════════════════════════
+      // CONFIG & TEST MODE
+      // ═══════════════════════════════════════
+      var IS_TEST = new URLSearchParams(window.location.search).has("test");
+      // Banner is handled by game-firebase.js (universal for all games)
+
+      // ═══════════════════════════════════════
+      // VOCABULARY DATA
+      // ═══════════════════════════════════════
+      var VOCAB = {
+        emotions: [
+          { pt: "feliz", en: "happy", emoji: "😄" },
+          { pt: "triste", en: "sad", emoji: "😢" },
+          { pt: "zangado", en: "angry", emoji: "😠" },
+          { pt: "assustado", en: "scared", emoji: "😨" },
+          { pt: "cansado", en: "tired", emoji: "🥱" },
+        ],
+        colors: [
+          { pt: "vermelho", en: "red", emoji: "🔴" },
+          { pt: "azul", en: "blue", emoji: "🔵" },
+          { pt: "amarelo", en: "yellow", emoji: "🟡" },
+          { pt: "verde", en: "green", emoji: "🟢" },
+          { pt: "laranja", en: "orange", emoji: "🟠" },
+          { pt: "roxo", en: "purple", emoji: "🟣" },
+          { pt: "rosa", en: "pink", emoji: "💗" },
+        ],
+        animals: [
+          { pt: "gato", en: "cat", emoji: "🐈" },
+          { pt: "cão", en: "dog", emoji: "🐕" },
+          { pt: "cavalo", en: "horse", emoji: "🐴" },
+          { pt: "vaca", en: "cow", emoji: "🐄" },
+          { pt: "leão", en: "lion", emoji: "🦁" },
+          { pt: "peixe", en: "fish", emoji: "🐟" },
+        ],
+        food: [
+          { pt: "banana", en: "banana", emoji: "🍌" },
+          { pt: "pão", en: "bread", emoji: "🍞" },
+          { pt: "leite", en: "milk", emoji: "🥛" },
+          { pt: "gelado", en: "ice cream", emoji: "🍦" },
+          { pt: "água", en: "water", emoji: "💧" },
+        ],
+        numbers: [
+          { pt: "um", en: "one", emoji: "1️⃣" },
+          { pt: "dois", en: "two", emoji: "2️⃣" },
+          { pt: "três", en: "three", emoji: "3️⃣" },
+          { pt: "quatro", en: "four", emoji: "4️⃣" },
+          { pt: "cinco", en: "five", emoji: "5️⃣" },
+          { pt: "seis", en: "six", emoji: "6️⃣" },
+          { pt: "sete", en: "seven", emoji: "7️⃣" },
+          { pt: "oito", en: "eight", emoji: "8️⃣" },
+          { pt: "nove", en: "nine", emoji: "9️⃣" },
+          { pt: "dez", en: "ten", emoji: "🔟" },
+        ],
+      };
+
+      // Sentence templates for sentence races
+      var SENTENCES = {
+        "eu-gosto": [
+          {
+            pt: "Eu gosto de gatos",
+            en: "I like cats",
+            words: ["Eu", "gosto", "de", "gatos"],
+            emoji: "🐈",
+          },
+          {
+            pt: "Eu gosto de cães",
+            en: "I like dogs",
+            words: ["Eu", "gosto", "de", "cães"],
+            emoji: "🐕",
+          },
+          {
+            pt: "Eu gosto de gelado",
+            en: "I like ice cream",
+            words: ["Eu", "gosto", "de", "gelado"],
+            emoji: "🍦",
+          },
+          {
+            pt: "Eu gosto de banana",
+            en: "I like bananas",
+            words: ["Eu", "gosto", "de", "banana"],
+            emoji: "🍌",
+          },
+          {
+            pt: "Eu gosto de vermelho",
+            en: "I like red",
+            words: ["Eu", "gosto", "de", "vermelho"],
+            emoji: "🔴",
+          },
+          {
+            pt: "Eu não gosto de aranhas",
+            en: "I don't like spiders",
+            words: ["Eu", "não", "gosto", "de", "aranhas"],
+            emoji: "🕷️",
+          },
+          {
+            pt: "Eu gosto de cavalos",
+            en: "I like horses",
+            words: ["Eu", "gosto", "de", "cavalos"],
+            emoji: "🐴",
+          },
+          {
+            pt: "Eu gosto de leite",
+            en: "I like milk",
+            words: ["Eu", "gosto", "de", "leite"],
+            emoji: "🥛",
+          },
+        ],
+        "eu-quero": [
+          {
+            pt: "Eu quero a bola",
+            en: "I want the ball",
+            words: ["Eu", "quero", "a", "bola"],
+            emoji: "⚽",
+          },
+          {
+            pt: "Eu quero o livro",
+            en: "I want the book",
+            words: ["Eu", "quero", "o", "livro"],
+            emoji: "📚",
+          },
+          {
+            pt: "Eu quero o leite",
+            en: "I want milk",
+            words: ["Eu", "quero", "o", "leite"],
+            emoji: "🥛",
+          },
+          {
+            pt: "Eu quero a banana",
+            en: "I want the banana",
+            words: ["Eu", "quero", "a", "banana"],
+            emoji: "🍌",
+          },
+          {
+            pt: "Eu quero o pão",
+            en: "I want bread",
+            words: ["Eu", "quero", "o", "pão"],
+            emoji: "🍞",
+          },
+          {
+            pt: "Eu quero o gelado",
+            en: "I want ice cream",
+            words: ["Eu", "quero", "o", "gelado"],
+            emoji: "🍦",
+          },
+          {
+            pt: "Eu quero a cadeira",
+            en: "I want the chair",
+            words: ["Eu", "quero", "a", "cadeira"],
+            emoji: "💺",
+          },
+          {
+            pt: "Eu quero o lápis",
+            en: "I want the pencil",
+            words: ["Eu", "quero", "o", "lápis"],
+            emoji: "✏️",
+          },
+        ],
+        "eu-estou": [
+          {
+            pt: "Eu estou feliz",
+            en: "I am happy",
+            words: ["Eu", "estou", "feliz"],
+            emoji: "😄",
+          },
+          {
+            pt: "Eu estou triste",
+            en: "I am sad",
+            words: ["Eu", "estou", "triste"],
+            emoji: "😢",
+          },
+          {
+            pt: "Eu estou zangado",
+            en: "I am angry",
+            words: ["Eu", "estou", "zangado"],
+            emoji: "😠",
+          },
+          {
+            pt: "Eu estou cansado",
+            en: "I am tired",
+            words: ["Eu", "estou", "cansado"],
+            emoji: "🥱",
+          },
+          {
+            pt: "Eu estou assustado",
+            en: "I am scared",
+            words: ["Eu", "estou", "assustado"],
+            emoji: "😨",
+          },
+          {
+            pt: "Eu estou bem",
+            en: "I am well",
+            words: ["Eu", "estou", "bem"],
+            emoji: "👍",
+          },
+          {
+            pt: "Eu não estou cansado",
+            en: "I am not tired",
+            words: ["Eu", "não", "estou", "cansado"],
+            emoji: "💪",
+          },
+          {
+            pt: "Eu não estou triste",
+            en: "I am not sad",
+            words: ["Eu", "não", "estou", "triste"],
+            emoji: "😊",
+          },
+        ],
+        "tu-verbo": [
+          {
+            pt: "Tu gostas de gatos?",
+            en: "Do you like cats?",
+            words: ["Tu", "gostas", "de", "gatos?"],
+            emoji: "🐈",
+            fill: {
+              sentence: "Tu ___ de gatos?",
+              options: ["gostas", "gosto", "gosta"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu queres a bola?",
+            en: "Do you want the ball?",
+            words: ["Tu", "queres", "a", "bola?"],
+            emoji: "⚽",
+            fill: {
+              sentence: "Tu ___ a bola?",
+              options: ["queres", "quero", "quer"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu estás feliz?",
+            en: "Are you happy?",
+            words: ["Tu", "estás", "feliz?"],
+            emoji: "😄",
+            fill: {
+              sentence: "Tu ___ feliz?",
+              options: ["estás", "estou", "está"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu tens um cão?",
+            en: "Do you have a dog?",
+            words: ["Tu", "tens", "um", "cão?"],
+            emoji: "🐕",
+            fill: {
+              sentence: "Tu ___ um cão?",
+              options: ["tens", "tenho", "tem"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu podes saltar?",
+            en: "Can you jump?",
+            words: ["Tu", "podes", "saltar?"],
+            emoji: "🦘",
+            fill: {
+              sentence: "Tu ___ saltar?",
+              options: ["podes", "posso", "pode"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu gostas de gelado?",
+            en: "Do you like ice cream?",
+            words: ["Tu", "gostas", "de", "gelado?"],
+            emoji: "🍦",
+            fill: {
+              sentence: "Tu ___ de gelado?",
+              options: ["gostas", "gosto", "gosta"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu estás cansado?",
+            en: "Are you tired?",
+            words: ["Tu", "estás", "cansado?"],
+            emoji: "🥱",
+            fill: {
+              sentence: "Tu ___ cansado?",
+              options: ["estás", "estou", "está"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu queres o leite?",
+            en: "Do you want the milk?",
+            words: ["Tu", "queres", "o", "leite?"],
+            emoji: "🥛",
+            fill: {
+              sentence: "Tu ___ o leite?",
+              options: ["queres", "quero", "quer"],
+              correct: 0,
+            },
+          },
+        ],
+        "frases-mix": [
+          {
+            pt: "Eu gosto de gatos",
+            en: "I like cats",
+            words: ["Eu", "gosto", "de", "gatos"],
+            emoji: "🐈",
+            fill: {
+              sentence: "Eu ___ de gatos",
+              options: ["gosto", "gostas", "gosta"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu queres a bola?",
+            en: "Do you want the ball?",
+            words: ["Tu", "queres", "a", "bola?"],
+            emoji: "⚽",
+            fill: {
+              sentence: "___ queres a bola?",
+              options: ["Tu", "Eu", "Ele"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Eu estou feliz",
+            en: "I am happy",
+            words: ["Eu", "estou", "feliz"],
+            emoji: "😄",
+            fill: {
+              sentence: "Eu estou ___",
+              options: ["feliz", "gosto", "quero"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu gostas de leite?",
+            en: "Do you like milk?",
+            words: ["Tu", "gostas", "de", "leite?"],
+            emoji: "🥛",
+            fill: {
+              sentence: "Tu gostas de ___?",
+              options: ["leite", "estou", "quero"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Eu quero o pão",
+            en: "I want bread",
+            words: ["Eu", "quero", "o", "pão"],
+            emoji: "🍞",
+            fill: {
+              sentence: "Eu ___ o pão",
+              options: ["quero", "queres", "quer"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Eu tenho um gato",
+            en: "I have a cat",
+            words: ["Eu", "tenho", "um", "gato"],
+            emoji: "🐈",
+            fill: {
+              sentence: "Eu ___ um gato",
+              options: ["tenho", "tens", "tem"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Tu estás cansado?",
+            en: "Are you tired?",
+            words: ["Tu", "estás", "cansado?"],
+            emoji: "🥱",
+            fill: {
+              sentence: "Tu ___ cansado?",
+              options: ["estás", "estou", "está"],
+              correct: 0,
+            },
+          },
+          {
+            pt: "Eu posso saltar",
+            en: "I can jump",
+            words: ["Eu", "posso", "saltar"],
+            emoji: "🦘",
+            fill: {
+              sentence: "Eu ___ saltar",
+              options: ["posso", "podes", "pode"],
+              correct: 0,
+            },
+          },
+        ],
+      };
+
+      // ═══════════════════════════════════════
+      // RACE DEFINITIONS
+      // ═══════════════════════════════════════
+      var RACES = [
+        // --- Vocabulary Races ---
+        {
+          id: "emotions",
+          name: "Emoções",
+          nameEn: "Emotions",
+          icon: "🎭",
+          color: "#e11d48",
+          type: "vocab",
+          vocab: "emotions",
+          exPerRace: 10,
+          targetTime: 60,
+        },
+        {
+          id: "colors",
+          name: "Cores",
+          nameEn: "Colors",
+          icon: "🎨",
+          color: "#ec4899",
+          type: "vocab",
+          vocab: "colors",
+          exPerRace: 10,
+          targetTime: 60,
+        },
+        {
+          id: "animals",
+          name: "Animais",
+          nameEn: "Animals",
+          icon: "🐾",
+          color: "#84cc16",
+          type: "vocab",
+          vocab: "animals",
+          exPerRace: 10,
+          targetTime: 60,
+        },
+        {
+          id: "food",
+          name: "Comida",
+          nameEn: "Food",
+          icon: "🍎",
+          color: "#f97316",
+          type: "vocab",
+          vocab: "food",
+          exPerRace: 10,
+          targetTime: 60,
+        },
+        {
+          id: "numbers",
+          name: "Números",
+          nameEn: "Numbers",
+          icon: "🔢",
+          color: "#3b82f6",
+          type: "vocab",
+          vocab: "numbers",
+          exPerRace: 10,
+          targetTime: 60,
+        },
+        // --- Sentence Races ---
+        {
+          id: "eu-gosto",
+          name: "Eu Gosto De...",
+          nameEn: "I Like...",
+          icon: "❤️",
+          color: "#ef4444",
+          type: "sentence",
+          exPerRace: 10,
+          targetTime: 90,
+        },
+        {
+          id: "eu-quero",
+          name: "Eu Quero...",
+          nameEn: "I Want...",
+          icon: "🎁",
+          color: "#8b5cf6",
+          type: "sentence",
+          exPerRace: 10,
+          targetTime: 90,
+        },
+        {
+          id: "eu-estou",
+          name: "Eu Estou...",
+          nameEn: "I Am/Feel...",
+          icon: "🧠",
+          color: "#06b6d4",
+          type: "sentence",
+          exPerRace: 10,
+          targetTime: 90,
+        },
+        {
+          id: "tu-verbo",
+          name: "Tu + Verbo",
+          nameEn: "You + Verb",
+          icon: "👉",
+          color: "#f59e0b",
+          type: "sentence",
+          exPerRace: 10,
+          targetTime: 90,
+        },
+        {
+          id: "frases-mix",
+          name: "Mistura!",
+          nameEn: "Mix It Up!",
+          icon: "🌀",
+          color: "#7c3aed",
+          type: "sentence",
+          exPerRace: 10,
+          targetTime: 90,
+        },
+        // --- Mixed Race ---
+        {
+          id: "mistura-total",
+          name: "Mistura Total!",
+          nameEn: "Total Mix!",
+          icon: "🏁",
+          color: "#f43f5e",
+          type: "mixed",
+          exPerRace: 12,
+          targetTime: 100,
+        },
+      ];
+
+      // Puzzles
+      var PUZZLES = [
+        {
+          id: "car",
+          name: "Race Car",
+          emoji: "🏎️",
+          pieces: ["🏎", "💨", "🏁", "🛞", "🔧", "⛽", "🏆", "💪", "⚡"],
+        },
+        {
+          id: "rocket",
+          name: "Rocket",
+          emoji: "🚀",
+          pieces: ["🚀", "🌟", "🪐", "🌙", "☄️", "👨‍🚀", "🛸", "🌌", "⭐"],
+        },
+        {
+          id: "dino",
+          name: "Dinosaur",
+          emoji: "🦕",
+          pieces: ["🦕", "🦖", "🥚", "🌋", "🌿", "🦴", "🪨", "🌴", "🐾"],
+        },
+        {
+          id: "castle",
+          name: "Castle",
+          emoji: "🏰",
+          pieces: ["🏰", "👑", "🗡️", "🛡️", "🐉", "🧙", "💎", "🔮", "🏳️"],
+        },
+        {
+          id: "robot",
+          name: "Robot",
+          emoji: "🤖",
+          pieces: ["🤖", "⚙️", "🔋", "💡", "🖥️", "🎮", "📡", "🔬", "🧲"],
+        },
+      ];
+      var PIECE_COST = 3; // diamonds per puzzle piece
+
+      // ═══════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════
+      var state = {
+        races: {}, // {raceId: {stars,bestScore,bestTime,diamonds}}
+        totalDiamonds: 0,
+        puzzles: {}, // {puzzleId: [ownedPieceIndices]}
+        totalStars: 0,
+      };
+
+      // Current race state
+      var race = {
+        def: null,
+        exercises: [],
+        current: 0,
+        score: 0,
+        errors: 0,
+        correct: 0,
+        startTime: 0,
+        exerciseStart: 0,
+        timerInterval: null,
+        elapsed: 0,
+        finished: false,
+      };
+
+      // ═══════════════════════════════════════
+      // PERSISTENCE
+      // ═══════════════════════════════════════
+      var STORAGE_KEY = IS_TEST
+        ? "word-racer-v1-teacher-test"
+        : "word-racer-v1";
+      function loadState() {
+        try {
+          var s = localStorage.getItem(STORAGE_KEY);
+          if (s) {
+            var p = JSON.parse(s);
+            Object.assign(state, p);
+          }
+        } catch (e) {}
+      }
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+        // Firebase — only save for student mode, not test
+        if (!IS_TEST && window.GameFirebase && window.GameFirebase.ready) {
+          window.GameFirebase.saveProgress(state);
+        }
+      }
+      function recalcTotals() {
+        var s = 0;
+        RACES.forEach(function (r) {
+          if (state.races[r.id]) s += state.races[r.id].stars || 0;
+        });
+        state.totalStars = s;
+      }
+
+      // Firebase cloud load
+      window.addEventListener("gameFirebaseReady", function () {
+        if (IS_TEST) return;
+        window.GameFirebase.loadProgress(function (data) {
+          if (data && data.races) {
+            Object.assign(state, data);
+            recalcTotals();
+            updateStatsUI();
+          }
+        });
+      });
+
+      // Init
+      loadState();
+      recalcTotals();
+
+      // ═══════════════════════════════════════
+      // SCREEN NAV
+      // ═══════════════════════════════════════
+      function goScreen(id) {
+        document.querySelectorAll(".screen").forEach(function (s) {
+          s.classList.remove("active");
+        });
+        document.getElementById("screen-" + id).classList.add("active");
+      }
+      function updateStatsUI() {
+        ["intro-stars", "sel-stars"].forEach(function (id) {
+          document.getElementById(id).textContent = state.totalStars;
+        });
+        ["intro-diamonds", "sel-diamonds", "shop-diamonds"].forEach(
+          function (id) {
+            document.getElementById(id).textContent = state.totalDiamonds;
+          },
+        );
+      }
+      function showIntro() {
+        updateStatsUI();
+        goScreen("intro");
+      }
+      function showSelect() {
+        updateStatsUI();
+        buildRaceList();
+        goScreen("select");
+      }
+      function showShop() {
+        updateStatsUI();
+        buildShop();
+        goScreen("shop");
+      }
+
+      // ═══════════════════════════════════════
+      // RACE SELECT
+      // ═══════════════════════════════════════
+      function buildRaceList() {
+        var el = document.getElementById("race-list");
+        el.innerHTML = "";
+        // Vocab section
+        el.innerHTML +=
+          '<div class="section-label">🔤 Vocabulary Races</div><div class="race-grid">' +
+          RACES.filter(function (r) {
+            return r.type === "vocab";
+          })
+            .map(raceCardHTML)
+            .join("") +
+          "</div>";
+        // Sentence section
+        el.innerHTML +=
+          '<div class="section-label">🏗️ Sentence Races</div><div class="race-grid">' +
+          RACES.filter(function (r) {
+            return r.type === "sentence";
+          })
+            .map(raceCardHTML)
+            .join("") +
+          "</div>";
+        // Mixed section
+        el.innerHTML +=
+          '<div class="section-label">🏁 Challenge Race</div><div class="race-grid">' +
+          RACES.filter(function (r) {
+            return r.type === "mixed";
+          })
+            .map(raceCardHTML)
+            .join("") +
+          "</div>";
+      }
+
+      function raceCardHTML(r) {
+        var rd = state.races[r.id] || {};
+        var stars = rd.stars || 0;
+        var starStr = "";
+        for (var i = 1; i <= 3; i++) starStr += i <= stars ? "⭐" : "☆";
+        var record = rd.bestTime ? formatTime(rd.bestTime) : "--:--";
+        var diamonds = rd.diamonds || 0;
+        return (
+          '<div class="race-card" style="border-color:' +
+          r.color +
+          '33" onclick="startRace(\'' +
+          r.id +
+          "')\">" +
+          '<div class="icon">' +
+          r.icon +
+          "</div>" +
+          '<div class="name" style="color:' +
+          r.color +
+          '">' +
+          r.name +
+          "</div>" +
+          '<div class="name-en">' +
+          r.nameEn +
+          "</div>" +
+          '<div class="stars-row">' +
+          starStr +
+          "</div>" +
+          (diamonds > 0
+            ? '<div class="record" style="color:#00d4ff">💎 ' +
+              diamonds +
+              "</div>"
+            : "") +
+          '<div class="record">🏆 ' +
+          record +
+          "</div>" +
+          "</div>"
+        );
+      }
+
+      // ═══════════════════════════════════════
+      // EXERCISE GENERATION
+      // ═══════════════════════════════════════
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+      function pick(arr, n, exclude) {
+        var pool = exclude
+          ? arr.filter(function (x) {
+              return x.pt !== exclude.pt;
+            })
+          : arr.slice();
+        return shuffle(pool).slice(0, n);
+      }
+
+      function generateVocabExercises(raceDef) {
+        var pool = VOCAB[raceDef.vocab];
+        var exercises = [];
+        var shuffled = shuffle(pool);
+        var n = raceDef.exPerRace;
+
+        for (var i = 0; i < n; i++) {
+          var word = shuffled[i % shuffled.length];
+          var type;
+          if (i % 3 === 0) type = "hear";
+          else if (i % 3 === 1) type = "read";
+          else type = "speak";
+
+          if (type === "hear") {
+            var wrongs = pick(pool, 3, word);
+            var opts = shuffle([word].concat(wrongs));
+            exercises.push({
+              type: "hear",
+              word: word,
+              options: opts,
+              correctIdx: opts.indexOf(word),
+            });
+          } else if (type === "read") {
+            var wrongs2 = pick(pool, 3, word);
+            var opts2 = shuffle([word].concat(wrongs2));
+            exercises.push({
+              type: "read",
+              word: word,
+              options: opts2,
+              correctIdx: opts2.indexOf(word),
+            });
+          } else {
+            exercises.push({ type: "speak", word: word });
+          }
+        }
+        return shuffle(exercises);
+      }
+
+      function generateSentenceExercises(raceDef) {
+        var pool = SENTENCES[raceDef.id];
+        if (!pool) return [];
+        var exercises = [];
+        var shuffled = shuffle(pool);
+        var n = raceDef.exPerRace;
+
+        for (var i = 0; i < n; i++) {
+          var sent = shuffled[i % shuffled.length];
+          var type;
+          if (i % 4 === 0) type = "hear-sentence";
+          else if (i % 4 === 1) type = "build";
+          else if (i % 4 === 2) type = "fill";
+          else type = "speak-sentence";
+
+          if (type === "hear-sentence") {
+            // Hear the sentence, pick the matching emoji
+            var wrongs = pick(pool, 3, sent).map(function (s) {
+              return { emoji: s.emoji, pt: s.pt };
+            });
+            var correct = { emoji: sent.emoji, pt: sent.pt };
+            var opts = shuffle([correct].concat(wrongs));
+            exercises.push({
+              type: "hear-sentence",
+              sentence: sent,
+              options: opts,
+              correctIdx: opts.indexOf(correct),
+            });
+          } else if (type === "build") {
+            exercises.push({ type: "build", sentence: sent });
+          } else if (type === "fill") {
+            var fillData = sent.fill;
+            if (fillData) {
+              exercises.push({
+                type: "fill",
+                sentence: sent,
+                fillSentence: fillData.sentence,
+                fillOptions: fillData.options,
+                fillCorrect: fillData.correct,
+              });
+            } else {
+              // Auto-generate fill: blank out a random word
+              var words = sent.words.slice();
+              var blankIdx = 1; // blank the verb
+              var answer = words[blankIdx];
+              var wrongWords = [
+                "gosto",
+                "quero",
+                "tenho",
+                "estou",
+                "posso",
+                "gostas",
+                "queres",
+                "tens",
+                "estás",
+                "podes",
+              ];
+              wrongWords = wrongWords.filter(function (w) {
+                return w !== answer;
+              });
+              var opts3 = shuffle(
+                [answer].concat(shuffle(wrongWords).slice(0, 2)),
+              );
+              var blanked = words.slice();
+              blanked[blankIdx] = "___";
+              exercises.push({
+                type: "fill",
+                sentence: sent,
+                fillSentence: blanked.join(" "),
+                fillOptions: opts3,
+                fillCorrect: opts3.indexOf(answer),
+              });
+            }
+          } else {
+            exercises.push({ type: "speak-sentence", sentence: sent });
+          }
+        }
+        return shuffle(exercises);
+      }
+
+      // ═══════════════════════════════════════
+      // MIXED EXERCISES (vocab + sentences)
+      // ═══════════════════════════════════════
+      function generateMixedExercises(def) {
+        var exercises = [];
+        var n = def.exPerRace || 12;
+        // Grab some vocab exercises from random categories
+        var vocabKeys = Object.keys(VOCAB);
+        for (var i = 0; i < Math.ceil(n / 2); i++) {
+          var vk = vocabKeys[Math.floor(Math.random() * vocabKeys.length)];
+          var pool = VOCAB[vk];
+          var word = pool[Math.floor(Math.random() * pool.length)];
+          var type = ["hear", "read", "speak"][i % 3];
+          if (type === "hear") {
+            var wrongs = pick(pool, 3, word);
+            var opts = shuffle([word].concat(wrongs));
+            exercises.push({
+              type: "hear",
+              word: word,
+              options: opts,
+              correctIdx: opts.indexOf(word),
+            });
+          } else if (type === "read") {
+            var wrongs2 = pick(pool, 3, word);
+            var opts2 = shuffle([word].concat(wrongs2));
+            exercises.push({
+              type: "read",
+              word: word,
+              options: opts2,
+              correctIdx: opts2.indexOf(word),
+            });
+          } else {
+            exercises.push({ type: "speak", word: word });
+          }
+        }
+        // Grab some sentence exercises from random categories
+        var sentKeys = Object.keys(SENTENCES);
+        for (var j = 0; j < Math.floor(n / 2); j++) {
+          var sk = sentKeys[Math.floor(Math.random() * sentKeys.length)];
+          var spool = SENTENCES[sk];
+          var sent = spool[Math.floor(Math.random() * spool.length)];
+          var stype = ["build", "fill", "hear-sentence", "speak-sentence"][
+            j % 4
+          ];
+          if (stype === "build") {
+            exercises.push({ type: "build", sentence: sent });
+          } else if (stype === "fill") {
+            var fillData = sent.fill;
+            if (fillData) {
+              exercises.push({
+                type: "fill",
+                sentence: sent,
+                fillSentence: fillData.sentence,
+                fillOptions: fillData.options,
+                fillCorrect: fillData.correct,
+              });
+            } else {
+              exercises.push({ type: "build", sentence: sent });
+            }
+          } else if (stype === "hear-sentence") {
+            var wrongs3 = pick(spool, 3, sent).map(function (s) {
+              return { emoji: s.emoji, pt: s.pt };
+            });
+            var correct3 = { emoji: sent.emoji, pt: sent.pt };
+            var opts3 = shuffle([correct3].concat(wrongs3));
+            exercises.push({
+              type: "hear-sentence",
+              sentence: sent,
+              options: opts3,
+              correctIdx: opts3.indexOf(correct3),
+            });
+          } else {
+            exercises.push({ type: "speak-sentence", sentence: sent });
+          }
+        }
+        return shuffle(exercises);
+      }
+
+      // ═══════════════════════════════════════
+      // START RACE
+      // ═══════════════════════════════════════
+      function startRace(raceId) {
+        var def = RACES.find(function (r) {
+          return r.id === raceId;
+        });
+        if (!def) return;
+        race.def = def;
+        race.exercises =
+          def.type === "vocab"
+            ? generateVocabExercises(def)
+            : def.type === "mixed"
+              ? generateMixedExercises(def)
+              : generateSentenceExercises(def);
+        race.current = 0;
+        race.score = 0;
+        race.errors = 0;
+        race.correct = 0;
+        race.elapsed = 0;
+        race.finished = false;
+
+        // Build track checkpoints
+        var cpEl = document.getElementById("track-checkpoints");
+        cpEl.innerHTML = "";
+        for (var i = 0; i < race.exercises.length; i++) {
+          cpEl.innerHTML += '<div class="track-dot" id="dot-' + i + '"></div>';
+        }
+        document.getElementById("track-car").style.left = "2%";
+        document.getElementById("track-score").textContent = "Score: 0";
+        document.getElementById("game-race-name").textContent =
+          def.icon + " " + def.name;
+
+        // Countdown
+        doCountdown(function () {
+          goScreen("game");
+          race.startTime = Date.now();
+          race.timerInterval = setInterval(updateTimer, 100);
+          showExercise();
+        });
+      }
+
+      function replayRace() {
+        if (race.def) startRace(race.def.id);
+      }
+
+      function doCountdown(cb) {
+        goScreen("countdown");
+        var nums = ["3", "2", "1", "GO! 🏎️"];
+        var i = 0;
+        var el = document.getElementById("countdown-num");
+        function tick() {
+          if (i >= nums.length) {
+            cb();
+            return;
+          }
+          el.textContent = nums[i];
+          el.style.color = i === 3 ? "#00ff88" : "#00d4ff";
+          el.style.animation = "none";
+          el.offsetHeight;
+          el.style.animation = "countPop .4s ease";
+          playTick();
+          i++;
+          setTimeout(tick, i === 4 ? 500 : 800);
+        }
+        tick();
+      }
+
+      // ═══════════════════════════════════════
+      // TIMER
+      // ═══════════════════════════════════════
+      function updateTimer() {
+        race.elapsed = (Date.now() - race.startTime) / 1000;
+        document.getElementById("game-timer").textContent =
+          "⏱ " + formatTime(race.elapsed);
+        document.getElementById("track-time").textContent = formatTime(
+          race.elapsed,
+        );
+      }
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var ss = Math.floor(s % 60);
+        return m + ":" + (ss < 10 ? "0" : "") + ss;
+      }
+
+      // ═══════════════════════════════════════
+      // SHOW EXERCISE
+      // ═══════════════════════════════════════
+      function showExercise() {
+        if (race.current >= race.exercises.length) {
+          finishRace();
+          return;
+        }
+        var ex = race.exercises[race.current];
+        race.exerciseStart = Date.now();
+        document.getElementById("game-progress").textContent =
+          race.current + 1 + "/" + race.exercises.length;
+
+        var area = document.getElementById("exercise-area");
+        area.innerHTML = "";
+
+        switch (ex.type) {
+          case "hear":
+            renderHear(area, ex);
+            break;
+          case "read":
+            renderRead(area, ex);
+            break;
+          case "speak":
+            renderSpeak(area, ex);
+            break;
+          case "hear-sentence":
+            renderHearSentence(area, ex);
+            break;
+          case "build":
+            renderBuild(area, ex);
+            break;
+          case "fill":
+            renderFill(area, ex);
+            break;
+          case "speak-sentence":
+            renderSpeakSentence(area, ex);
+            break;
+        }
+      }
+
+      function exerciseCorrect() {
+        var elapsed = (Date.now() - race.exerciseStart) / 1000;
+        var pts = 100;
+        if (elapsed < 3) pts += 50;
+        else if (elapsed < 5) pts += 25;
+        else if (elapsed < 8) pts += 10;
+        pts += 20; // first-try bonus (only if correct on first try)
+        race.score += pts;
+        race.correct++;
+        updateCarPosition();
+        document.getElementById("track-score").textContent =
+          "Score: " + race.score;
+        showFeedback("✅", function () {
+          race.current++;
+          showExercise();
+        });
+      }
+
+      function exerciseWrong() {
+        race.errors++;
+        showFeedback("❌", null);
+      }
+
+      function exerciseCorrectRetry() {
+        // Correct but after a wrong attempt — reduced points
+        var elapsed = (Date.now() - race.exerciseStart) / 1000;
+        var pts = 60;
+        if (elapsed < 5) pts += 15;
+        else if (elapsed < 8) pts += 5;
+        race.score += pts;
+        race.correct++;
+        updateCarPosition();
+        document.getElementById("track-score").textContent =
+          "Score: " + race.score;
+        showFeedback("✅", function () {
+          race.current++;
+          showExercise();
+        });
+      }
+
+      function updateCarPosition() {
+        var pct = 2 + ((race.current + 1) / race.exercises.length) * 88;
+        document.getElementById("track-car").style.left = pct + "%";
+        var dot = document.getElementById("dot-" + race.current);
+        if (dot) dot.classList.add("passed");
+      }
+
+      function showFeedback(icon, cb) {
+        var el = document.getElementById("feedback");
+        var ic = document.getElementById("fb-icon");
+        ic.textContent = icon;
+        ic.style.animation = "none";
+        ic.offsetHeight;
+        ic.style.animation = "fbPop .5s ease";
+        el.classList.add("show");
+        if (icon === "✅") playCorrectSound();
+        else playWrongSound();
+        setTimeout(
+          function () {
+            el.classList.remove("show");
+            if (cb) cb();
+          },
+          icon === "✅" ? 600 : 400,
+        );
+      }
+
+      // ═══════════════════════════════════════
+      // EXERCISE RENDERERS
+      // ═══════════════════════════════════════
+
+      // --- HEAR: Play word audio, pick emoji ---
+      function renderHear(area, ex) {
+        var hadWrong = false;
+        area.innerHTML =
+          '<div class="exercise-type-label">👂 Listen & Pick</div>' +
+          '<button class="play-audio-btn" id="play-btn" onclick="playWordAudio(\'' +
+          ex.word.pt +
+          "')\">🔊</button>" +
+          '<div class="exercise-prompt">What did you hear?</div>' +
+          '<div class="options-grid">' +
+          ex.options
+            .map(function (o, i) {
+              return (
+                '<button class="option-btn emoji-opt" data-idx="' +
+                i +
+                '">' +
+                o.emoji +
+                "</button>"
+              );
+            })
+            .join("") +
+          "</div>";
+        // Auto-play
+        setTimeout(function () {
+          playWordAudio(ex.word.pt);
+        }, 300);
+        // Bind clicks
+        area.querySelectorAll(".option-btn").forEach(function (btn) {
+          btn.onclick = function () {
+            var idx = parseInt(btn.dataset.idx);
+            if (idx === ex.correctIdx) {
+              btn.classList.add("correct");
+              disableOptions(area);
+              if (hadWrong) exerciseCorrectRetry();
+              else exerciseCorrect();
+            } else {
+              btn.classList.add("wrong");
+              btn.style.pointerEvents = "none";
+              hadWrong = true;
+              exerciseWrong();
+            }
+          };
+        });
+      }
+
+      // --- READ: Show emoji, pick PT word ---
+      function renderRead(area, ex) {
+        var hadWrong = false;
+        area.innerHTML =
+          '<div class="exercise-type-label">📖 Read & Match</div>' +
+          '<div class="exercise-emoji">' +
+          ex.word.emoji +
+          "</div>" +
+          '<div class="exercise-prompt">What is this?</div>' +
+          '<div class="options-grid">' +
+          ex.options
+            .map(function (o, i) {
+              return (
+                '<button class="option-btn" data-idx="' +
+                i +
+                '">' +
+                o.pt +
+                "</button>"
+              );
+            })
+            .join("") +
+          "</div>";
+        area.querySelectorAll(".option-btn").forEach(function (btn) {
+          btn.onclick = function () {
+            var idx = parseInt(btn.dataset.idx);
+            if (idx === ex.correctIdx) {
+              btn.classList.add("correct");
+              disableOptions(area);
+              if (hadWrong) exerciseCorrectRetry();
+              else exerciseCorrect();
+            } else {
+              btn.classList.add("wrong");
+              btn.style.pointerEvents = "none";
+              hadWrong = true;
+              exerciseWrong();
+            }
+          };
+        });
+      }
+
+      // --- SPEAK: Show word + emoji, kid says it ---
+      function renderSpeak(area, ex) {
+        var hasSR = !!(
+          window.SpeechRecognition || window.webkitSpeechRecognition
+        );
+        area.innerHTML =
+          '<div class="exercise-type-label">🎤 Say It!</div>' +
+          '<div class="exercise-emoji">' +
+          ex.word.emoji +
+          "</div>" +
+          '<div class="speak-word">' +
+          ex.word.pt +
+          "</div>" +
+          '<button class="play-audio-btn" onclick="playWordAudio(\'' +
+          ex.word.pt +
+          '\')" style="width:48px;height:48px;font-size:1.2rem;margin:8px 0">🔊</button>' +
+          '<div class="speak-area">' +
+          '<button class="mic-btn" id="mic-btn">🎤</button>' +
+          '<div class="speak-heard" id="speak-heard">' +
+          (hasSR ? "Tap the mic and say it!" : "Say it out loud, then tap ✓") +
+          "</div>" +
+          (!hasSR
+            ? '<button class="speak-skip" id="speak-done" style="display:none">I said it! ✓</button>'
+            : "") +
+          "</div>";
+
+        setTimeout(function () {
+          playWordAudio(ex.word.pt);
+        }, 300);
+        var micBtn = document.getElementById("mic-btn");
+        var heard = document.getElementById("speak-heard");
+        var attempts = 0;
+
+        if (hasSR) {
+          micBtn.onclick = function () {
+            if (micBtn.classList.contains("done")) return;
+            micBtn.classList.add("listening");
+            heard.textContent = "Listening...";
+            startSpeechRecognition(
+              function (result) {
+                micBtn.classList.remove("listening");
+                attempts++;
+                if (fuzzyMatch(ex.word.pt, result)) {
+                  heard.textContent = '✅ "' + result + '"';
+                  micBtn.textContent = "✅";
+                  micBtn.classList.add("done");
+                  exerciseCorrect();
+                } else {
+                  heard.textContent = '❌ "' + result + '" — Try again!';
+                  if (attempts >= 3) {
+                    heard.textContent = "The answer was: " + ex.word.pt;
+                    micBtn.textContent = "→";
+                    micBtn.classList.add("done");
+                    micBtn.onclick = function () {
+                      race.score += 30;
+                      race.correct++;
+                      updateCarPosition();
+                      race.current++;
+                      showExercise();
+                    };
+                  }
+                }
+              },
+              function () {
+                micBtn.classList.remove("listening");
+                heard.textContent = "Could not hear. Try again!";
+              },
+            );
+          };
+        } else {
+          // No speech recognition — honor system
+          var doneBtn = document.getElementById("speak-done");
+          micBtn.onclick = function () {
+            playWordAudio(ex.word.pt);
+            heard.textContent = "Now say it! Then tap ✓";
+            doneBtn.style.display = "inline-block";
+          };
+          doneBtn.onclick = function () {
+            exerciseCorrect();
+          };
+        }
+      }
+
+      // --- HEAR-SENTENCE: Play sentence, pick emoji ---
+      function renderHearSentence(area, ex) {
+        var hadWrong = false;
+        area.innerHTML =
+          '<div class="exercise-type-label">👂 Listen & Pick</div>' +
+          '<button class="play-audio-btn" id="play-btn" onclick="speakSentence(\'' +
+          escHtml(ex.sentence.pt) +
+          "')\">🔊</button>" +
+          '<div class="exercise-prompt">What did you hear?</div>' +
+          '<div class="options-grid">' +
+          ex.options
+            .map(function (o, i) {
+              return (
+                '<button class="option-btn emoji-opt" data-idx="' +
+                i +
+                '">' +
+                o.emoji +
+                "</button>"
+              );
+            })
+            .join("") +
+          "</div>";
+        setTimeout(function () {
+          speakSentence(ex.sentence.pt);
+        }, 300);
+        area.querySelectorAll(".option-btn").forEach(function (btn) {
+          btn.onclick = function () {
+            var idx = parseInt(btn.dataset.idx);
+            if (idx === ex.correctIdx) {
+              btn.classList.add("correct");
+              disableOptions(area);
+              if (hadWrong) exerciseCorrectRetry();
+              else exerciseCorrect();
+            } else {
+              btn.classList.add("wrong");
+              btn.style.pointerEvents = "none";
+              hadWrong = true;
+              exerciseWrong();
+            }
+          };
+        });
+      }
+
+      // --- BUILD: Arrange words to form sentence ---
+      function renderBuild(area, ex) {
+        var sent = ex.sentence;
+        var shuffledWords = shuffle(sent.words.slice());
+        var placed = [];
+        var slots = sent.words.length;
+
+        area.innerHTML =
+          '<div class="exercise-type-label">🏗️ Build the Sentence</div>' +
+          '<div class="build-hint">' +
+          sent.en +
+          " " +
+          sent.emoji +
+          "</div>" +
+          '<div class="build-slots" id="build-slots"></div>' +
+          '<div class="build-tiles" id="build-tiles"></div>' +
+          '<div class="build-result" id="build-result"></div>';
+
+        function renderSlots() {
+          var slotsEl = document.getElementById("build-slots");
+          slotsEl.innerHTML = "";
+          for (var i = 0; i < slots; i++) {
+            if (i < placed.length) {
+              var s = document.createElement("div");
+              s.className = "build-slot";
+              s.textContent = placed[i];
+              s.dataset.idx = i;
+              s.onclick = function () {
+                var idx = parseInt(this.dataset.idx);
+                placed.splice(idx, 1);
+                renderSlots();
+                renderTiles();
+              };
+              slotsEl.appendChild(s);
+            } else {
+              var e = document.createElement("div");
+              e.className = "build-slot empty";
+              e.textContent = "___";
+              slotsEl.appendChild(e);
+            }
+          }
+          // Check if complete
+          if (placed.length === slots) {
+            checkBuild();
+          }
+        }
+
+        function renderTiles() {
+          var tilesEl = document.getElementById("build-tiles");
+          tilesEl.innerHTML = "";
+          shuffledWords.forEach(function (w) {
+            var t = document.createElement("div");
+            t.className = "build-tile";
+            if (
+              placed.indexOf(w) !== -1 &&
+              countInArr(placed, w) >=
+                countInArr(
+                  shuffledWords.filter(function (x, idx) {
+                    return shuffledWords.indexOf(x) === idx || x === w;
+                  }),
+                  w,
+                )
+            ) {
+              // More precise: check if this specific instance is used
+            }
+            // Simple: count occurrences
+            var usedCount = placed.filter(function (p) {
+              return p === w;
+            }).length;
+            var totalCount = shuffledWords.filter(function (p) {
+              return p === w;
+            }).length;
+            // For tiles, we render each individually
+            t.textContent = w;
+            t.onclick = function () {
+              placed.push(w);
+              renderSlots();
+              renderTiles();
+            };
+            tilesEl.appendChild(t);
+          });
+          // Hide used tiles properly
+          var usedCounts = {};
+          placed.forEach(function (p) {
+            usedCounts[p] = (usedCounts[p] || 0) + 1;
+          });
+          var tileCounts = {};
+          tilesEl.querySelectorAll(".build-tile").forEach(function (t) {
+            var w = t.textContent;
+            tileCounts[w] = (tileCounts[w] || 0) + 1;
+            if (usedCounts[w] && tileCounts[w] <= usedCounts[w]) {
+              t.classList.add("used");
+            }
+          });
+        }
+
+        var hadWrong = false;
+        function checkBuild() {
+          var result = placed.join(" ");
+          var expected = sent.words.join(" ");
+          var resEl = document.getElementById("build-result");
+          if (result === expected) {
+            resEl.textContent = "✅ " + result;
+            resEl.className = "build-result correct";
+            if (hadWrong) exerciseCorrectRetry();
+            else exerciseCorrect();
+          } else {
+            resEl.textContent = "❌ Try again!";
+            resEl.className = "build-result wrong";
+            hadWrong = true;
+            exerciseWrong();
+            setTimeout(function () {
+              placed = [];
+              resEl.textContent = "";
+              resEl.className = "build-result";
+              renderSlots();
+              renderTiles();
+            }, 800);
+          }
+        }
+
+        renderSlots();
+        renderTiles();
+      }
+
+      // --- FILL: Fill in the blank ---
+      function renderFill(area, ex) {
+        var hadWrong = false;
+        area.innerHTML =
+          '<div class="exercise-type-label">✏️ Fill the Blank</div>' +
+          '<div class="exercise-emoji">' +
+          ex.sentence.emoji +
+          "</div>" +
+          '<div class="exercise-prompt">' +
+          escHtml(ex.fillSentence) +
+          "</div>" +
+          '<div class="build-hint">' +
+          ex.sentence.en +
+          "</div>" +
+          '<div class="options-grid" style="grid-template-columns:repeat(' +
+          ex.fillOptions.length +
+          ',1fr)">' +
+          ex.fillOptions
+            .map(function (o, i) {
+              return (
+                '<button class="option-btn" data-idx="' +
+                i +
+                '">' +
+                o +
+                "</button>"
+              );
+            })
+            .join("") +
+          "</div>";
+        area.querySelectorAll(".option-btn").forEach(function (btn) {
+          btn.onclick = function () {
+            var idx = parseInt(btn.dataset.idx);
+            if (idx === ex.fillCorrect) {
+              btn.classList.add("correct");
+              disableOptions(area);
+              if (hadWrong) exerciseCorrectRetry();
+              else exerciseCorrect();
+            } else {
+              btn.classList.add("wrong");
+              btn.style.pointerEvents = "none";
+              hadWrong = true;
+              exerciseWrong();
+            }
+          };
+        });
+      }
+
+      // --- SPEAK-SENTENCE: Show sentence, kid says it ---
+      function renderSpeakSentence(area, ex) {
+        var hasSR = !!(
+          window.SpeechRecognition || window.webkitSpeechRecognition
+        );
+        area.innerHTML =
+          '<div class="exercise-type-label">🎤 Say the Sentence!</div>' +
+          '<div class="exercise-emoji">' +
+          ex.sentence.emoji +
+          "</div>" +
+          '<div class="speak-word" style="font-size:1.4rem">' +
+          escHtml(ex.sentence.pt) +
+          "</div>" +
+          '<div class="build-hint">' +
+          ex.sentence.en +
+          "</div>" +
+          '<button class="play-audio-btn" onclick="speakSentence(\'' +
+          escHtml(ex.sentence.pt) +
+          '\')" style="width:48px;height:48px;font-size:1.2rem;margin:8px 0">🔊</button>' +
+          '<div class="speak-area">' +
+          '<button class="mic-btn" id="mic-btn">🎤</button>' +
+          '<div class="speak-heard" id="speak-heard">' +
+          (hasSR ? "Tap the mic and say it!" : "Say it out loud, then tap ✓") +
+          "</div>" +
+          (!hasSR
+            ? '<button class="speak-skip" id="speak-done" style="display:none">I said it! ✓</button>'
+            : "") +
+          "</div>";
+
+        setTimeout(function () {
+          speakSentence(ex.sentence.pt);
+        }, 300);
+        var micBtn = document.getElementById("mic-btn");
+        var heard = document.getElementById("speak-heard");
+        var attempts = 0;
+
+        if (hasSR) {
+          micBtn.onclick = function () {
+            if (micBtn.classList.contains("done")) return;
+            micBtn.classList.add("listening");
+            heard.textContent = "Listening...";
+            startSpeechRecognition(
+              function (result) {
+                micBtn.classList.remove("listening");
+                attempts++;
+                if (fuzzyMatchSentence(ex.sentence.pt, result)) {
+                  heard.textContent = '✅ "' + result + '"';
+                  micBtn.textContent = "✅";
+                  micBtn.classList.add("done");
+                  exerciseCorrect();
+                } else {
+                  heard.textContent = '❌ "' + result + '" — Try again!';
+                  if (attempts >= 3) {
+                    heard.textContent = "Answer: " + ex.sentence.pt;
+                    micBtn.textContent = "→";
+                    micBtn.classList.add("done");
+                    micBtn.onclick = function () {
+                      race.score += 30;
+                      race.correct++;
+                      updateCarPosition();
+                      race.current++;
+                      showExercise();
+                    };
+                  }
+                }
+              },
+              function () {
+                micBtn.classList.remove("listening");
+                heard.textContent = "Could not hear. Try again!";
+              },
+            );
+          };
+        } else {
+          var doneBtn = document.getElementById("speak-done");
+          micBtn.onclick = function () {
+            speakSentence(ex.sentence.pt);
+            heard.textContent = "Now say it! Then tap ✓";
+            doneBtn.style.display = "inline-block";
+          };
+          doneBtn.onclick = function () {
+            exerciseCorrect();
+          };
+        }
+      }
+
+      function disableOptions(area) {
+        area.querySelectorAll(".option-btn").forEach(function (b) {
+          b.style.pointerEvents = "none";
+        });
+      }
+      function countInArr(arr, val) {
+        return arr.filter(function (x) {
+          return x === val;
+        }).length;
+      }
+      function escHtml(s) {
+        return s.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+      }
+
+      // ═══════════════════════════════════════
+      // FINISH RACE
+      // ═══════════════════════════════════════
+      function finishRace() {
+        if (race.finished) return;
+        race.finished = true;
+        clearInterval(race.timerInterval);
+        var elapsed = race.elapsed;
+        var maxScore = 170 * race.exercises.length;
+        var pct = race.score / maxScore;
+        var stars = 0;
+        if (pct >= 0.3) stars = 1;
+        if (pct >= 0.55) stars = 2;
+        if (pct >= 0.8) stars = 3;
+
+        var diamonds = 0;
+        if (stars >= 3) {
+          diamonds = 1 + Math.floor((pct - 0.8) * 20);
+        }
+
+        // Check records
+        var prev = state.races[race.def.id] || {
+          stars: 0,
+          bestScore: 0,
+          bestTime: Infinity,
+          diamonds: 0,
+        };
+        var isNewRecord = race.score > (prev.bestScore || 0);
+        var newStars = Math.max(stars, prev.stars || 0);
+
+        // Calculate new diamonds to award
+        var newDiamonds = diamonds;
+        // Award diamonds for this run (saves to separate storage in test mode)
+        state.totalDiamonds += newDiamonds;
+        state.races[race.def.id] = {
+          stars: newStars,
+          bestScore: Math.max(race.score, prev.bestScore || 0),
+          bestTime: Math.min(elapsed, prev.bestTime || Infinity),
+          diamonds: (prev.diamonds || 0) + newDiamonds,
+        };
+        recalcTotals();
+        saveState();
+
+        // Show results
+        var starStr = "";
+        for (var i = 1; i <= 3; i++) starStr += i <= stars ? "⭐" : "☆";
+        document.getElementById("results-stars").textContent = starStr;
+
+        var tierEl = document.getElementById("results-tier");
+        var tierClass =
+          stars === 3
+            ? diamonds > 1
+              ? "tier-diamond"
+              : "tier-gold"
+            : stars === 2
+              ? "tier-silver"
+              : "tier-bronze";
+        var tierName =
+          stars === 3
+            ? diamonds > 1
+              ? "💎 DIAMOND"
+              : "🥇 GOLD"
+            : stars === 2
+              ? "🥈 SILVER"
+              : stars === 1
+                ? "🥉 BRONZE"
+                : "TRY AGAIN";
+        tierEl.innerHTML =
+          '<div class="tier-badge ' + tierClass + '">' + tierName + "</div>";
+
+        document.getElementById("results-stats").innerHTML =
+          '<div class="stat-box"><div class="val">' +
+          race.score +
+          '</div><div class="label">Score</div></div>' +
+          '<div class="stat-box"><div class="val">' +
+          formatTime(elapsed) +
+          '</div><div class="label">Time</div></div>' +
+          '<div class="stat-box"><div class="val">' +
+          race.correct +
+          "/" +
+          race.exercises.length +
+          '</div><div class="label">Correct</div></div>' +
+          '<div class="stat-box"><div class="val">' +
+          race.errors +
+          '</div><div class="label">Mistakes</div></div>';
+
+        document.getElementById("results-diamonds").textContent =
+          newDiamonds > 0 ? "💎 +" + newDiamonds + " diamonds!" : "";
+        var rec = document.getElementById("results-record");
+        rec.classList.toggle("show", isNewRecord);
+
+        goScreen("results");
+        playFinishSound(stars);
+      }
+
+      // ═══════════════════════════════════════
+      // PUZZLE SHOP
+      // ═══════════════════════════════════════
+      function buildShop() {
+        var el = document.getElementById("puzzle-list");
+        el.innerHTML = "";
+        PUZZLES.forEach(function (pz) {
+          var owned = state.puzzles[pz.id] || [];
+          var complete = owned.length >= 9;
+          var html =
+            '<div class="puzzle-card"><div class="pz-name">' +
+            pz.emoji +
+            " " +
+            pz.name +
+            "</div>";
+          html += '<div class="puzzle-grid-mini">';
+          for (var i = 0; i < 9; i++) {
+            if (owned.indexOf(i) !== -1) {
+              html += '<div class="pz-piece owned">' + pz.pieces[i] + "</div>";
+            } else {
+              html +=
+                '<div class="pz-piece locked" onclick="buyPiece(\'' +
+                pz.id +
+                "'," +
+                i +
+                ')">💎' +
+                PIECE_COST +
+                "</div>";
+            }
+          }
+          html += "</div>";
+          html +=
+            '<div class="pz-progress">' + owned.length + "/9 pieces</div>";
+          if (complete) {
+            html += '<div class="puzzle-complete">✅ COMPLETE!</div>';
+            html +=
+              '<button class="badge-print-btn" onclick="printBadge(\'' +
+              pz.id +
+              "')\">🖨️ Print Badge</button>";
+          }
+          html += "</div>";
+          el.innerHTML += html;
+        });
+      }
+
+      function printBadge(puzzleId) {
+        var pz = PUZZLES.find(function (p) {
+          return p.id === puzzleId;
+        });
+        if (!pz) return;
+        var area = document.getElementById("badge-print-area");
+        area.innerHTML =
+          '<div class="badge-card">' +
+          '<div class="badge-emoji">' +
+          pz.emoji +
+          "</div>" +
+          '<div class="badge-title">🏅 ' +
+          pz.name +
+          " Badge</div>" +
+          '<div class="badge-sub">Word Racer — Corrida das Palavras</div>' +
+          '<div class="badge-stars">⭐⭐⭐</div>' +
+          '<div class="badge-sub" style="margin-top:12px">Completed by: _____________</div>' +
+          '<div class="badge-sub">Date: ' +
+          new Date().toLocaleDateString() +
+          "</div>" +
+          "</div>" +
+          '<p style="margin-top:30px;color:#888;font-size:14px">' +
+          '<button onclick="window.print()" style="padding:10px 24px;font-size:16px;cursor:pointer;border-radius:10px;border:1px solid #ccc">🖨️ Print</button>' +
+          "&nbsp;&nbsp;<button onclick=\"document.getElementById('badge-print-area').style.display='none'\" style=\"padding:10px 24px;font-size:16px;cursor:pointer;border-radius:10px;border:1px solid #ccc\">✕ Close</button>" +
+          "</p>";
+        area.style.display = "block";
+      }
+
+      function buyPiece(puzzleId, pieceIdx) {
+        if (state.totalDiamonds < PIECE_COST) {
+          showToast("Need " + PIECE_COST + " 💎!");
+          return;
+        }
+        if (!state.puzzles[puzzleId]) state.puzzles[puzzleId] = [];
+        if (state.puzzles[puzzleId].indexOf(pieceIdx) !== -1) return;
+
+        state.totalDiamonds -= PIECE_COST;
+        state.puzzles[puzzleId].push(pieceIdx);
+        saveState();
+        buildShop();
+        updateStatsUI();
+        playCorrectSound();
+
+        if (state.puzzles[puzzleId].length >= 9) {
+          setTimeout(function () {
+            showToast(
+              "🎉 Puzzle Complete! " +
+                PUZZLES.find(function (p) {
+                  return p.id === puzzleId;
+                }).emoji,
+            );
+          }, 300);
+        }
+      }
+
+      function showToast(msg) {
+        var t = document.createElement("div");
+        t.style.cssText =
+          "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:30px;font-size:.9rem;font-weight:700;z-index:999;animation:fbPop .3s ease";
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function () {
+          t.remove();
+        }, 2000);
+      }
+
+      // ═══════════════════════════════════════
+      // RESET PROGRESS
+      // ═══════════════════════════════════════
+      function confirmReset() {
+        document.getElementById("reset-confirm").style.display = "block";
+      }
+      function doReset() {
+        var input = document.getElementById("reset-input");
+        if (input.value.trim().toUpperCase() !== "RESET") {
+          showToast("Type RESET to confirm");
+          return;
+        }
+        state = { races: {}, totalDiamonds: 0, puzzles: {}, totalStars: 0 };
+        saveState();
+        recalcTotals();
+        updateStatsUI();
+        document.getElementById("reset-confirm").style.display = "none";
+        input.value = "";
+        showToast("🗑️ All progress reset!");
+        setTimeout(function () {
+          showIntro();
+        }, 1000);
+      }
+
+      // ═══════════════════════════════════════
+      // AUDIO: Word playback
+      // ═══════════════════════════════════════
+      function playWordAudio(word) {
+        var file =
+          "../spelling-stars/audio/" +
+          word.replace(/ /g, "_").replace(/-/g, "_").toLowerCase() +
+          ".mp3";
+        var btn = document.getElementById("play-btn");
+        try {
+          var a = new Audio(file);
+          a.onplay = function () {
+            if (btn) btn.classList.add("playing");
+          };
+          a.onended = function () {
+            if (btn) btn.classList.remove("playing");
+          };
+          a.onerror = function () {
+            speakWord(word);
+          };
+          a.play().catch(function () {
+            speakWord(word);
+          });
+        } catch (e) {
+          speakWord(word);
+        }
+      }
+
+      // Fallback TTS for words
+      function speakWord(text) {
+        if (!window.speechSynthesis) return;
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "pt-PT";
+        u.rate = 0.85;
+        var v = findPtPTVoice();
+        if (v) {
+          u.voice = v;
+          u.lang = v.lang;
+        }
+        speechSynthesis.speak(u);
+      }
+
+      // TTS for sentences
+      function speakSentence(text) {
+        if (!window.speechSynthesis) return;
+        try {
+          speechSynthesis.cancel();
+        } catch (e) {}
+        // Small delay after cancel to avoid Chrome bug
+        setTimeout(function () {
+          try {
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = "pt-PT";
+            u.rate = 0.82;
+            var v = findPtPTVoice();
+            if (v) {
+              u.voice = v;
+              u.lang = v.lang;
+            }
+            var btn = document.getElementById("play-btn");
+            u.onstart = function () {
+              if (btn) btn.classList.add("playing");
+            };
+            u.onend = function () {
+              if (btn) btn.classList.remove("playing");
+            };
+            u.onerror = function () {
+              if (btn) btn.classList.remove("playing");
+            };
+            speechSynthesis.speak(u);
+            // Chrome pause/resume hack to fix stuck speech
+            if (/Chrome/i.test(navigator.userAgent)) {
+              setTimeout(function () {
+                speechSynthesis.pause();
+                speechSynthesis.resume();
+              }, 100);
+            }
+          } catch (e) {}
+        }, 50);
+      }
+
+      var _ptVoice = null,
+        _voiceSearched = false;
+      function findPtPTVoice() {
+        if (_voiceSearched) return _ptVoice;
+        if (!window.speechSynthesis) return null;
+        var voices = speechSynthesis.getVoices();
+        if (!voices.length) return null;
+        _voiceSearched = true;
+        var best = null,
+          bestScore = -999;
+        voices.forEach(function (v) {
+          var lang = v.lang || "";
+          if (!lang.startsWith("pt")) return;
+          var s = 0;
+          if (/premium/i.test(v.name)) s += 200;
+          if (/enhanced/i.test(v.name)) s += 150;
+          if (/google/i.test(v.name)) s += 120;
+          if (/neural/i.test(v.name)) s += 100;
+          if (lang === "pt-PT" || lang === "pt_PT") s += 500;
+          else if (lang === "pt-BR" || lang === "pt_BR") s += 5;
+          if (!v.localService) s += 30;
+          if (/eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley/i.test(v.name))
+            s -= 300;
+          if (/compact|espeak|mbrola/i.test(v.name)) s -= 500;
+          if (s > bestScore) {
+            bestScore = s;
+            best = v;
+          }
+        });
+        _ptVoice = best;
+        return best;
+      }
+      if (window.speechSynthesis) {
+        speechSynthesis.onvoiceschanged = function () {
+          _voiceSearched = false;
+          findPtPTVoice();
+        };
+        findPtPTVoice();
+        setTimeout(function () {
+          _voiceSearched = false;
+          findPtPTVoice();
+        }, 500);
+      }
+
+      // ═══════════════════════════════════════
+      // SPEECH RECOGNITION
+      // ═══════════════════════════════════════
+      function startSpeechRecognition(onResult, onError) {
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          if (onError) onError();
+          return;
+        }
+        var rec = new SR();
+        rec.lang = "pt-PT";
+        rec.interimResults = false;
+        rec.maxAlternatives = 5;
+        rec.onresult = function (e) {
+          var results = [];
+          for (var i = 0; i < e.results[0].length; i++) {
+            results.push(e.results[0][i].transcript.toLowerCase().trim());
+          }
+          if (onResult) onResult(results.join(" | ").split(" | ")[0] || "");
+        };
+        rec.onerror = function () {
+          if (onError) onError();
+        };
+        rec.onend = function () {};
+        try {
+          rec.start();
+        } catch (e) {
+          if (onError) onError();
+        }
+        // Auto-stop after 5s
+        setTimeout(function () {
+          try {
+            rec.stop();
+          } catch (e) {}
+        }, 5000);
+      }
+
+      function fuzzyMatch(expected, heard) {
+        expected = expected.toLowerCase().trim();
+        heard = heard.toLowerCase().trim();
+        if (heard === expected) return true;
+        if (heard.includes(expected)) return true;
+        if (expected.includes(heard) && heard.length >= 3) return true;
+        if (levenshtein(expected, heard) <= 2) return true;
+        return false;
+      }
+
+      function fuzzyMatchSentence(expected, heard) {
+        expected = expected.toLowerCase().replace(/[?!.]/g, "").trim();
+        heard = heard.toLowerCase().replace(/[?!.]/g, "").trim();
+        if (heard === expected) return true;
+        // Check word overlap
+        var expWords = expected.split(/\s+/);
+        var heardWords = heard.split(/\s+/);
+        var matches = 0;
+        expWords.forEach(function (w) {
+          if (heardWords.indexOf(w) !== -1) matches++;
+        });
+        return matches >= expWords.length * 0.6;
+      }
+
+      function levenshtein(a, b) {
+        var m = a.length,
+          n = b.length;
+        var dp = [];
+        for (var i = 0; i <= m; i++) {
+          dp[i] = [i];
+        }
+        for (var j = 0; j <= n; j++) {
+          dp[0][j] = j;
+        }
+        for (var i = 1; i <= m; i++) {
+          for (var j = 1; j <= n; j++) {
+            dp[i][j] =
+              a[i - 1] === b[j - 1]
+                ? dp[i - 1][j - 1]
+                : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+          }
+        }
+        return dp[m][n];
+      }
+
+      // ═══════════════════════════════════════
+      // SOUND EFFECTS
+      // ═══════════════════════════════════════
+      function playTick() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          ctx.resume();
+          var o = ctx.createOscillator();
+          var g = ctx.createGain();
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.frequency.value = 800;
+          o.type = "sine";
+          g.gain.setValueAtTime(0.15, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+          o.start();
+          o.stop(ctx.currentTime + 0.1);
+        } catch (e) {}
+      }
+      function playCorrectSound() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          ctx.resume();
+          var o = ctx.createOscillator();
+          var g = ctx.createGain();
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.type = "sine";
+          g.gain.setValueAtTime(0.2, ctx.currentTime);
+          o.frequency.setValueAtTime(523, ctx.currentTime);
+          o.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+          o.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          o.start();
+          o.stop(ctx.currentTime + 0.35);
+        } catch (e) {}
+      }
+      function playWrongSound() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          ctx.resume();
+          var o = ctx.createOscillator();
+          var g = ctx.createGain();
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.type = "sawtooth";
+          o.frequency.value = 200;
+          g.gain.setValueAtTime(0.12, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          o.start();
+          o.stop(ctx.currentTime + 0.2);
+        } catch (e) {}
+      }
+      function playFinishSound(stars) {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          ctx.resume();
+          var notes =
+            stars >= 3
+              ? [523, 659, 784, 1047]
+              : stars >= 2
+                ? [523, 659, 784]
+                : [523, 659];
+          notes.forEach(function (f, i) {
+            var o = ctx.createOscillator();
+            var g = ctx.createGain();
+            o.connect(g);
+            g.connect(ctx.destination);
+            o.type = "sine";
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0, ctx.currentTime + i * 0.15);
+            g.gain.linearRampToValueAtTime(
+              0.2,
+              ctx.currentTime + i * 0.15 + 0.05,
+            );
+            g.gain.exponentialRampToValueAtTime(
+              0.001,
+              ctx.currentTime + i * 0.15 + 0.4,
+            );
+            o.start(ctx.currentTime + i * 0.15);
+            o.stop(ctx.currentTime + i * 0.15 + 0.4);
+          });
+        } catch (e) {}
+      }
+
+      // ═══════════════════════════════════════
+      // UNLOCK AUDIO (call on first user interaction)
+      // ═══════════════════════════════════════
+      function unlockAudio() {
+        // Unlock AudioContext
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          ctx.resume().then(function () {
+            ctx.close();
+          });
+        } catch (e) {}
+        // Unlock SpeechSynthesis with empty utterance
+        if (window.speechSynthesis) {
+          try {
+            speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance("");
+            u.volume = 0;
+            speechSynthesis.speak(u);
+          } catch (e) {}
+          // Re-search voices after unlock
+          _voiceSearched = false;
+          setTimeout(function () {
+            findPtPTVoice();
+          }, 200);
+        }
+      }
+
+      // ═══════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════
+      updateStatsUI();
+    </script>
+  </body>
+</html>

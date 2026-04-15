@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 100 114" width="512" height="560" fill="none">
+  <!-- The Burnay Labs "BL" monogram logo -->
+  <!-- B letterform -->
+  <path
+    d="M10,6 L48,6 L58,16 L58,38 L48,48 L58,58 L58,84 L48,96 L10,96 Z"
+    stroke="#ffffff"
+    stroke-width="2.5"
+    fill="none"
+    stroke-linejoin="miter"
+  />
+  <!-- B crossbar -->
+  <line
+    x1="10" y1="48" x2="48" y2="48"
+    stroke="#ffffff"
+    stroke-width="2.5"
+  />
+  <!-- L letterform -->
+  <polyline
+    points="70,4 70,70 48,96 92,96"
+    stroke="#ffffff"
+    stroke-width="2.5"
+    fill="none"
+    stroke-linejoin="miter"
+  />
+</svg>

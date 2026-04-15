@@ -1,0 +1,1928 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Spelling Stars" />
+    <title>Spelling Stars ⭐ — Portuguese!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: #0b0716;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      /* === BG === */
+      .bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #fff;
+        border-radius: 50%;
+        animation: twinkle var(--d) ease-in-out infinite;
+      }
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.15;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .shooting-star {
+        position: absolute;
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, #fff, transparent);
+        border-radius: 2px;
+        opacity: 0;
+        animation: shoot var(--d) linear infinite;
+        animation-delay: var(--delay);
+      }
+      @keyframes shoot {
+        0% {
+          transform: translate(0, 0) rotate(-30deg);
+          opacity: 0;
+        }
+        5% {
+          opacity: 1;
+        }
+        30% {
+          opacity: 0;
+        }
+        100% {
+          transform: translate(-400px, 200px) rotate(-30deg);
+          opacity: 0;
+        }
+      }
+
+      /* === Container === */
+      .wrap {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 520px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        overflow: hidden;
+      }
+      .screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        flex: 1;
+        overflow: hidden;
+      }
+      .screen.active {
+        display: flex;
+      }
+
+      /* === INTRO === */
+      .intro-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        text-align: center;
+        padding: 0 8px;
+      }
+      .intro-planet {
+        font-size: 4rem;
+        animation: float 3s ease-in-out infinite;
+        margin-bottom: 12px;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      .intro-title {
+        font-size: 1.6rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fbbf24, #ec4899, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 16px;
+      }
+      .intro-msg {
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 400px;
+        margin-bottom: 20px;
+      }
+      .intro-msg b {
+        color: #fbbf24;
+      }
+      .intro-btn {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        border: none;
+        color: #fff;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 800;
+        padding: 14px 44px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+      }
+      .intro-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 30px rgba(124, 58, 237, 0.6);
+      }
+      .intro-btn:active {
+        transform: scale(0.97);
+      }
+
+      /* === HUB === */
+      .hub-header {
+        text-align: center;
+        margin: 8px 0 4px;
+      }
+      .hub-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        opacity: 0.8;
+      }
+      .hub-stars {
+        font-size: 0.8rem;
+        color: #fbbf24;
+        margin: 2px 0 8px;
+      }
+      .hub-universe {
+        position: relative;
+        width: 100%;
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
+      }
+      .galaxy-orb {
+        position: absolute;
+        cursor: pointer;
+        transition: all 0.4s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .galaxy-orb:hover {
+        filter: brightness(1.3);
+      }
+      .galaxy-img {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+      .galaxy-orb.conquered .galaxy-img {
+        box-shadow:
+          0 0 20px var(--gc),
+          0 0 40px var(--gc);
+        animation: galaxySpin 6s linear infinite;
+      }
+      .galaxy-orb.conquered .galaxy-img::after {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        border-top-color: var(--gc);
+        border-right-color: var(--gc);
+        animation: lightRingRotate 1.8s linear infinite;
+        opacity: 0.9;
+        pointer-events: none;
+      }
+      @keyframes lightRingRotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes galaxySpin {
+        from {
+          transform: rotate(0);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .galaxy-orb:not(.conquered) .galaxy-img {
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        filter: grayscale(0.7) brightness(0.5);
+      }
+      .galaxy-orb:not(.conquered):hover .galaxy-img {
+        filter: grayscale(0.3) brightness(0.8);
+      }
+      .galaxy-name {
+        font-size: 0.6rem;
+        font-weight: 700;
+        margin-top: 4px;
+        opacity: 0.7;
+        text-align: center;
+        max-width: 80px;
+      }
+      .galaxy-prog {
+        font-size: 0.5rem;
+        opacity: 0.4;
+      }
+      .orbit-path {
+        position: absolute;
+        border: 1px dashed rgba(255, 255, 255, 0.04);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* === GAME === */
+      .game-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 2px 0;
+        margin-bottom: 4px;
+      }
+      .back-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 50px;
+        cursor: pointer;
+      }
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .hud-cat {
+        font-size: 0.7rem;
+        font-weight: 700;
+        opacity: 0.5;
+      }
+      .hud-stars-g {
+        font-size: 0.8rem;
+        color: #fbbf24;
+      }
+      .hud-progress {
+        display: flex;
+        gap: 3px;
+        justify-content: center;
+        margin-bottom: 6px;
+      }
+      .hud-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        transition: all 0.3s;
+      }
+      .hud-dot.done {
+        background: #10b981;
+      }
+      .hud-dot.current {
+        background: #fbbf24;
+        box-shadow: 0 0 6px #fbbf24;
+      }
+
+      /* Puzzle */
+      .puzzle-wrap {
+        width: 100%;
+        max-width: 260px;
+        aspect-ratio: 1;
+        margin: 0 auto 6px;
+        position: relative;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.06);
+        transition:
+          box-shadow 0.8s ease,
+          filter 0.6s ease;
+      }
+      .puzzle-wrap.glow-1 {
+        box-shadow: 0 0 15px rgba(124, 58, 237, 0.15);
+        filter: brightness(1.05);
+      }
+      .puzzle-wrap.glow-2 {
+        box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+        filter: brightness(1.1);
+      }
+      .puzzle-wrap.glow-3 {
+        box-shadow: 0 0 40px rgba(124, 58, 237, 0.4);
+        filter: brightness(1.2);
+      }
+      .puzzle-wrap.glow-4 {
+        box-shadow:
+          0 0 60px rgba(124, 58, 237, 0.55),
+          0 0 100px rgba(124, 58, 237, 0.25);
+        filter: brightness(1.35);
+      }
+      .puzzle-piece {
+        position: absolute;
+        transition: all 0.6s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        opacity: 0;
+        transform: scale(0.5) rotate(10deg);
+        backdrop-filter: blur(2px);
+      }
+      .puzzle-piece.revealed {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+      }
+      .puzzle-piece.glow {
+        animation: pieceGlow 0.8s ease;
+      }
+      @keyframes pieceGlow {
+        0% {
+          filter: brightness(1);
+        }
+        50% {
+          filter: brightness(2.5);
+        }
+        100% {
+          filter: brightness(1);
+        }
+      }
+      .puzzle-bg {
+        position: absolute;
+        inset: 0;
+        opacity: 0.06;
+        border-radius: 16px;
+      }
+
+      /* Word bar */
+      .word-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 6px 0;
+        width: 100%;
+        justify-content: center;
+      }
+      .word-emoji-sm {
+        font-size: 2.2rem;
+      }
+      .word-en {
+        font-size: 0.85rem;
+        font-weight: 700;
+        opacity: 0.7;
+      }
+      .speak-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        color: #fff;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .speak-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.1);
+      }
+      .speak-btn.playing {
+        animation: speakPulse 0.6s ease infinite;
+      }
+      @keyframes speakPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
+        }
+      }
+      .hint-btn {
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.65rem;
+        padding: 3px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        opacity: 0.4;
+        transition: all 0.2s;
+      }
+      .hint-btn:hover {
+        opacity: 1;
+      }
+
+      /* Slots */
+      .slots {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        margin: 8px 0;
+        flex-wrap: wrap;
+      }
+      .slot {
+        width: 34px;
+        height: 40px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 800;
+        transition: all 0.3s;
+        text-transform: lowercase;
+      }
+      .slot.filled {
+        background: rgba(124, 58, 237, 0.25);
+        border: 2px solid #7c3aed;
+        animation: slotPop 0.3s ease;
+      }
+      .slot.correct {
+        background: rgba(16, 185, 129, 0.25);
+        border-color: #10b981;
+        color: #10b981;
+      }
+      .slot.wrong {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: #ef4444;
+        color: #ef4444;
+        animation: shake 0.4s ease;
+      }
+      .slot.hint-reveal {
+        background: rgba(251, 191, 36, 0.12);
+        border-color: #fbbf24;
+        color: #fbbf24;
+      }
+      @keyframes slotPop {
+        0% {
+          transform: scale(0.8);
+        }
+        50% {
+          transform: scale(1.12);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      /* Tiles */
+      .tiles {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 6px 0;
+        max-width: 340px;
+      }
+      .tile {
+        width: 40px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.35),
+          rgba(236, 72, 153, 0.25)
+        );
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: lowercase;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      }
+      .tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 14px rgba(124, 58, 237, 0.4);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+      .tile:active {
+        transform: scale(0.92);
+      }
+      .tile.used {
+        opacity: 0.12;
+        pointer-events: none;
+        transform: scale(0.8);
+      }
+      .tile.wrong-flash {
+        animation: shake 0.4s ease;
+        border-color: #ef4444;
+      }
+
+      /* Success overlay */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(11, 7, 22, 0.88);
+        backdrop-filter: blur(8px);
+        flex-direction: column;
+      }
+      .overlay.active {
+        display: flex;
+      }
+      .ov-emoji {
+        font-size: 4rem;
+        animation: successBounce 0.6s ease;
+      }
+      @keyframes successBounce {
+        0% {
+          transform: scale(0) rotate(-20deg);
+        }
+        60% {
+          transform: scale(1.3) rotate(5deg);
+        }
+        100% {
+          transform: scale(1) rotate(0);
+        }
+      }
+      .ov-text {
+        font-size: 1.3rem;
+        font-weight: 800;
+        margin: 8px 0 2px;
+      }
+      .ov-word {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #a78bfa;
+        margin-bottom: 4px;
+      }
+      .ov-stars {
+        font-size: 1.6rem;
+        margin: 6px 0;
+      }
+      .ov-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 800;
+        padding: 11px 32px;
+        border-radius: 50px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.2s;
+      }
+      .ov-btn:hover {
+        transform: scale(1.05);
+      }
+
+      /* Cat complete */
+      .gc-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        text-align: center;
+        padding: 16px;
+      }
+      .gc-galaxy {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        margin: 16px 0;
+        animation: galaxySpinBig 8s linear infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+      }
+      @keyframes galaxySpinBig {
+        from {
+          transform: rotate(0);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .gc-title {
+        font-size: 1.4rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #10b981, #fbbf24);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .gc-sub {
+        font-size: 0.8rem;
+        opacity: 0.6;
+        margin: 8px 0 16px;
+      }
+
+      /* Confetti */
+      .confetti {
+        position: fixed;
+        top: -10px;
+        z-index: 200;
+        animation: confettiFall var(--d) linear forwards;
+      }
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-80px);
+        z-index: 150;
+        background: rgba(11, 7, 22, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 8px 18px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        transition: transform 0.3s ease;
+        backdrop-filter: blur(8px);
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Responsive */
+      @media (max-height: 680px) {
+        .puzzle-wrap {
+          max-width: 180px;
+        }
+        .word-emoji-sm {
+          font-size: 1.8rem;
+        }
+        .slot {
+          width: 30px;
+          height: 36px;
+          font-size: 1rem;
+        }
+        .tile {
+          width: 34px;
+          height: 38px;
+          font-size: 1.1rem;
+        }
+        .intro-planet {
+          font-size: 3rem;
+        }
+        .galaxy-img {
+          width: 50px;
+          height: 50px;
+          font-size: 1.3rem;
+        }
+      }
+      @media (max-width: 360px) {
+        .slot {
+          width: 26px;
+          height: 32px;
+          font-size: 0.95rem;
+        }
+        .tile {
+          width: 30px;
+          height: 34px;
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg" id="bg"></div>
+
+    <div class="wrap">
+      <!-- INTRO -->
+      <div class="screen active" id="s-intro">
+        <div class="intro-wrap">
+          <div class="intro-planet">🪐</div>
+          <div class="intro-title">Spelling Stars</div>
+          <div class="intro-msg">
+            <b>Brave Explorer!</b><br /><br />
+            The Universe is in trouble. Nine galaxies have gone dark — their
+            stars scattered, their words completely forgotten.<br /><br />
+            You're the only one who can bring them back.<br /><br />
+            Each galaxy is a <b>puzzle</b> made of Portuguese words. Spell a
+            word correctly and a piece of the galaxy lights up. Spell them all
+            and the whole galaxy comes back to life, spinning through space!<br /><br />
+            Restore all <b>9 galaxies</b> and the Universe will be whole
+            again.<br /><br />
+            Ready, Explorer? 🚀
+          </div>
+          <button class="intro-btn" onclick="goHub()">
+            Save the Universe! ⭐
+          </button>
+        </div>
+      </div>
+
+      <!-- HUB -->
+      <div class="screen" id="s-hub">
+        <div class="hub-header">
+          <div class="hub-title">🌌 The Universe</div>
+          <div class="hub-stars" id="hub-stars">⭐ 0 stars collected</div>
+        </div>
+        <div class="hub-universe" id="hub-universe"></div>
+      </div>
+
+      <!-- GAME -->
+      <div class="screen" id="s-game">
+        <div class="game-top">
+          <button class="back-btn" onclick="exitGame()">← Exit</button>
+          <div class="hud-cat" id="hud-cat"></div>
+          <div class="hud-stars-g" id="hud-stars-g">⭐ 0</div>
+        </div>
+        <div class="hud-progress" id="hud-progress"></div>
+        <div class="puzzle-wrap" id="puzzle-wrap"></div>
+        <div class="word-bar">
+          <span class="word-emoji-sm" id="word-emoji"></span>
+          <div class="word-en" id="word-en"></div>
+          <button class="speak-btn" id="speak-btn" onclick="speakWord()">
+            🔊
+          </button>
+          <button class="hint-btn" id="hint-btn" onclick="giveHint()">
+            💡 Hint
+          </button>
+        </div>
+        <div class="slots" id="slots"></div>
+        <div class="tiles" id="tiles"></div>
+      </div>
+
+      <!-- CAT DONE -->
+      <div class="screen" id="s-catdone">
+        <div class="gc-wrap">
+          <div class="gc-galaxy" id="gc-galaxy" style="--gc: #7c3aed">🎉</div>
+          <div class="gc-title" id="gc-title">Galaxy Restored!</div>
+          <div class="gc-sub" id="gc-sub"></div>
+          <button class="intro-btn" onclick="goHub()">
+            🌌 Back to the Universe
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS OVERLAY -->
+    <div class="overlay" id="ov-success">
+      <div class="ov-emoji" id="ov-emoji">⭐</div>
+      <div class="ov-text" id="ov-text">Amazing!</div>
+      <div class="ov-word" id="ov-word"></div>
+      <div class="ov-stars" id="ov-stars"></div>
+      <button class="ov-btn" onclick="nextWord()">Next Word →</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      // =====================
+      // DATA
+      // =====================
+      var CATEGORIES = [
+        {
+          id: "colors",
+          name: "Cores",
+          nameEn: "Colors",
+          icon: "🎨",
+          color: "#ec4899",
+          words: [
+            { pt: "vermelho", en: "red", emoji: "🔴" },
+            { pt: "azul", en: "blue", emoji: "🔵" },
+            { pt: "amarelo", en: "yellow", emoji: "🟡" },
+            { pt: "verde", en: "green", emoji: "🟢" },
+            { pt: "laranja", en: "orange", emoji: "🟠" },
+            { pt: "roxo", en: "purple", emoji: "🟣" },
+            { pt: "rosa", en: "pink", emoji: "💗" },
+            { pt: "preto", en: "black", emoji: "⚫" },
+            { pt: "branco", en: "white", emoji: "⚪" },
+          ],
+        },
+        {
+          id: "numbers",
+          name: "Números",
+          nameEn: "Numbers",
+          icon: "🔢",
+          color: "#3b82f6",
+          words: [
+            { pt: "um", en: "one", emoji: "1️⃣" },
+            { pt: "dois", en: "two", emoji: "2️⃣" },
+            { pt: "três", en: "three", emoji: "3️⃣" },
+            { pt: "quatro", en: "four", emoji: "4️⃣" },
+            { pt: "cinco", en: "five", emoji: "5️⃣" },
+            { pt: "seis", en: "six", emoji: "6️⃣" },
+            { pt: "sete", en: "seven", emoji: "7️⃣" },
+            { pt: "oito", en: "eight", emoji: "8️⃣" },
+            { pt: "nove", en: "nine", emoji: "9️⃣" },
+            { pt: "dez", en: "ten", emoji: "🔟" },
+          ],
+        },
+        {
+          id: "commands",
+          name: "Comandos",
+          nameEn: "Commands",
+          icon: "🎯",
+          color: "#f59e0b",
+          words: [
+            { pt: "olha", en: "look", emoji: "👁️" },
+            { pt: "ouve", en: "listen", emoji: "👂" },
+            { pt: "salta", en: "jump", emoji: "🦘" },
+            { pt: "senta-te", en: "sit down", emoji: "🪑" },
+            { pt: "levanta-te", en: "stand up", emoji: "🧍" },
+            { pt: "come", en: "eat", emoji: "🍽️" },
+            { pt: "bebe", en: "drink", emoji: "🥤" },
+            { pt: "dorme", en: "sleep", emoji: "😴" },
+            { pt: "brinca", en: "play", emoji: "🎮" },
+          ],
+        },
+        {
+          id: "greetings",
+          name: "Saudações",
+          nameEn: "Greetings",
+          icon: "👋",
+          color: "#10b981",
+          words: [
+            { pt: "olá", en: "hello", emoji: "👋" },
+            { pt: "bom dia", en: "good morning", emoji: "🌅" },
+            { pt: "boa noite", en: "good night", emoji: "🌙" },
+            { pt: "adeus", en: "goodbye", emoji: "🫡" },
+            { pt: "obrigado", en: "thank you", emoji: "🙏" },
+            { pt: "sim", en: "yes", emoji: "✅" },
+            { pt: "não", en: "no", emoji: "❌" },
+          ],
+        },
+        {
+          id: "objects",
+          name: "Objetos",
+          nameEn: "Objects",
+          icon: "📦",
+          color: "#8b5cf6",
+          words: [
+            { pt: "livro", en: "book", emoji: "📚" },
+            { pt: "lápis", en: "pencil", emoji: "✏️" },
+            { pt: "bola", en: "ball", emoji: "⚽" },
+            { pt: "cadeira", en: "chair", emoji: "💺" },
+          ],
+        },
+        {
+          id: "actions",
+          name: "Ações",
+          nameEn: "Actions",
+          icon: "🏃",
+          color: "#06b6d4",
+          words: [
+            { pt: "comer", en: "to eat", emoji: "🍽️" },
+            { pt: "beber", en: "to drink", emoji: "🥤" },
+            { pt: "dormir", en: "to sleep", emoji: "😴" },
+            { pt: "brincar", en: "to play", emoji: "🎮" },
+          ],
+        },
+        {
+          id: "family",
+          name: "Família",
+          nameEn: "Family",
+          icon: "👨‍👩‍👧‍👦",
+          color: "#f43f5e",
+          words: [
+            { pt: "mãe", en: "mom", emoji: "👩" },
+            { pt: "pai", en: "dad", emoji: "👨" },
+            { pt: "avó", en: "grandmother", emoji: "👵" },
+            { pt: "avô", en: "grandfather", emoji: "👴" },
+            { pt: "bebé", en: "baby", emoji: "👶" },
+            { pt: "irmão", en: "brother", emoji: "👦" },
+            { pt: "irmã", en: "sister", emoji: "👧" },
+          ],
+        },
+        {
+          id: "animals",
+          name: "Animais",
+          nameEn: "Animals",
+          icon: "🐾",
+          color: "#84cc16",
+          words: [
+            { pt: "gato", en: "cat", emoji: "🐈" },
+            { pt: "cão", en: "dog", emoji: "🐕" },
+            { pt: "cavalo", en: "horse", emoji: "🐴" },
+            { pt: "vaca", en: "cow", emoji: "🐄" },
+            { pt: "leão", en: "lion", emoji: "🦁" },
+            { pt: "peixe", en: "fish", emoji: "🐟" },
+          ],
+        },
+        {
+          id: "food",
+          name: "Comida",
+          nameEn: "Food",
+          icon: "🍎",
+          color: "#f97316",
+          words: [
+            { pt: "banana", en: "banana", emoji: "🍌" },
+            { pt: "água", en: "water", emoji: "💧" },
+            { pt: "gelado", en: "ice cream", emoji: "🍦" },
+            { pt: "pão", en: "bread", emoji: "🍞" },
+            { pt: "leite", en: "milk", emoji: "🥛" },
+          ],
+        },
+        {
+          id: "simaodiz",
+          name: "Simão Diz",
+          nameEn: "Simon Says",
+          icon: "🧙‍♂️",
+          color: "#7c3aed",
+          words: [
+            { pt: "dança", en: "dance", emoji: "💃" },
+            { pt: "canta", en: "sing", emoji: "🎤" },
+            { pt: "corre", en: "run", emoji: "🏃" },
+            { pt: "acena", en: "wave", emoji: "👋" },
+            { pt: "roda", en: "spin", emoji: "🌀" },
+            { pt: "sopra", en: "blow", emoji: "🌬️" },
+            { pt: "grita", en: "shout", emoji: "📣" },
+            { pt: "sorri", en: "smile", emoji: "😊" },
+            { pt: "abraça", en: "hug", emoji: "🤗" },
+            { pt: "anda", en: "walk", emoji: "🚶" },
+            { pt: "para", en: "stop", emoji: "🛑" },
+            { pt: "aponta", en: "point", emoji: "👆" },
+          ],
+        },
+        {
+          id: "emotions",
+          name: "Emoções",
+          nameEn: "Emotions",
+          icon: "🎭",
+          color: "#e11d48",
+          words: [
+            { pt: "feliz", en: "happy (fuh-LEESH)", emoji: "😄" },
+            { pt: "triste", en: "sad (TREESH-tuh)", emoji: "😢" },
+            { pt: "zangado", en: "angry (zahn-GAH-doo)", emoji: "😠" },
+            { pt: "assustado", en: "scared (ah-soosh-TAH-doo)", emoji: "😨" },
+            { pt: "cansado", en: "tired (kahn-SAH-doo)", emoji: "🥱" },
+            { pt: "contente", en: "happy/glad (kon-TEN-tuh)", emoji: "😊" },
+            { pt: "bem", en: "well/good (bayn)", emoji: "👍" },
+            { pt: "mal", en: "bad (mahl)", emoji: "👎" },
+          ],
+        },
+      ];
+
+      // =====================
+      // STATE
+      // =====================
+      var totalStars = 0,
+        currentCat = null,
+        currentWordIdx = 0,
+        currentLetters = [],
+        filledCount = 0,
+        wordStars = 3,
+        hintsUsed = 0,
+        mistakes = 0,
+        locked = false;
+      var progress = {};
+      try {
+        var sv = localStorage.getItem("spelling-stars-v2");
+        if (sv) {
+          var pp = JSON.parse(sv);
+          progress = pp.progress || {};
+          totalStars = pp.totalStars || 0;
+        }
+      } catch (e) {}
+
+      // Load cloud progress when Firebase is ready (overrides localStorage)
+      window.addEventListener("gameFirebaseReady", function () {
+        window.GameFirebase.loadProgress(function (data) {
+          if (data && data.progress) {
+            progress = data.progress;
+            totalStars = data.totalStars || 0;
+            if (typeof showMap === "function") showMap();
+          }
+        });
+      });
+
+      function saveProgress() {
+        // Always save to localStorage (offline fallback)
+        try {
+          localStorage.setItem(
+            "spelling-stars-v2",
+            JSON.stringify({ progress: progress, totalStars: totalStars }),
+          );
+        } catch (e) {}
+        // Also save to cloud if connected
+        if (window.GameFirebase && window.GameFirebase.ready) {
+          window.GameFirebase.saveProgress({
+            progress: progress,
+            totalStars: totalStars,
+          });
+        }
+      }
+
+      // =====================
+      // BG
+      // =====================
+      (function () {
+        var bg = document.getElementById("bg"),
+          h = "";
+        for (var i = 0; i < 80; i++) {
+          h +=
+            '<div class="star" style="left:' +
+            Math.random() * 100 +
+            "%;top:" +
+            Math.random() * 100 +
+            "%;--d:" +
+            (1.5 + Math.random() * 3).toFixed(1) +
+            's"></div>';
+        }
+        for (var j = 0; j < 3; j++) {
+          h +=
+            '<div class="shooting-star" style="left:' +
+            (20 + Math.random() * 60) +
+            "%;top:" +
+            Math.random() * 40 +
+            "%;--d:" +
+            (6 + Math.random() * 8).toFixed(1) +
+            "s;--delay:" +
+            (Math.random() * 10).toFixed(1) +
+            's"></div>';
+        }
+        bg.innerHTML = h;
+      })();
+
+      // =====================
+      // SCREENS
+      // =====================
+      function goScreen(id) {
+        document.querySelectorAll(".screen").forEach(function (s) {
+          s.classList.remove("active");
+        });
+        document.getElementById("s-" + id).classList.add("active");
+      }
+      function goHub() {
+        stopIntroNarration();
+        goScreen("hub");
+        buildHub();
+      }
+
+      // =====================
+      // HUB
+      // =====================
+      function buildHub() {
+        document.getElementById("hub-stars").textContent =
+          "⭐ " + totalStars + " stars collected";
+        var u = document.getElementById("hub-universe");
+        u.innerHTML = "";
+        var rect = u.getBoundingClientRect();
+        var cw = rect.width,
+          ch = rect.height;
+        var cx = cw / 2,
+          cy = ch / 2;
+
+        var padded = Math.min(cw, ch) - 80;
+        var orbits = [
+          padded * 0.14,
+          padded * 0.26,
+          padded * 0.37,
+          padded * 0.47,
+        ];
+        orbits.forEach(function (r) {
+          var p = document.createElement("div");
+          p.className = "orbit-path";
+          p.style.width = r * 2 + "px";
+          p.style.height = r * 2 + "px";
+          u.appendChild(p);
+        });
+
+        var positions = [
+          { r: orbits[0], a: 0 },
+          { r: orbits[0], a: 120 },
+          { r: orbits[0], a: 240 },
+          { r: orbits[1], a: 30 },
+          { r: orbits[1], a: 150 },
+          { r: orbits[1], a: 270 },
+          { r: orbits[2], a: 60 },
+          { r: orbits[2], a: 180 },
+          { r: orbits[2], a: 300 },
+          { r: orbits[3], a: 10 },
+          { r: orbits[3], a: 170 },
+        ];
+
+        CATEGORIES.forEach(function (cat, idx) {
+          var pr = progress[cat.id] || { completed: [], stars: 0 };
+          var conquered = pr.completed.length >= cat.words.length;
+          var pos = positions[idx] || { r: 100, a: idx * 40 };
+          var x = cx + pos.r * Math.cos((pos.a * Math.PI) / 180) - 32;
+          var y = cy + pos.r * Math.sin((pos.a * Math.PI) / 180) - 32;
+
+          var el = document.createElement("div");
+          el.className = "galaxy-orb" + (conquered ? " conquered" : "");
+          el.style.left = x + "px";
+          el.style.top = y + "px";
+          el.style.setProperty("--gc", cat.color);
+
+          el.innerHTML =
+            '<div class="galaxy-img" style="background:radial-gradient(circle,' +
+            cat.color +
+            "33,transparent 70%);border:2px solid " +
+            cat.color +
+            '44">' +
+            cat.icon +
+            "</div>" +
+            '<div class="galaxy-name">' +
+            cat.nameEn +
+            "</div>" +
+            '<div class="galaxy-prog">' +
+            pr.completed.length +
+            "/" +
+            cat.words.length +
+            "</div>";
+
+          el.onclick = function () {
+            startCategory(idx);
+          };
+
+          // Unique float animation
+          var fx = (Math.random() * 8 - 4).toFixed(1),
+            fy = (Math.random() * 8 - 4).toFixed(1),
+            fd = (2 + Math.random() * 2).toFixed(1);
+          var kfName = "gf" + idx;
+          var st = document.createElement("style");
+          st.textContent =
+            "@keyframes " +
+            kfName +
+            "{0%,100%{transform:translate(0,0)}50%{transform:translate(" +
+            fx +
+            "px," +
+            fy +
+            "px)}}";
+          document.head.appendChild(st);
+          el.style.animation = kfName + " " + fd + "s ease-in-out infinite";
+
+          u.appendChild(el);
+        });
+      }
+
+      // =====================
+      // START CATEGORY
+      // =====================
+      function startCategory(idx) {
+        currentCat = idx;
+        var cat = CATEGORIES[idx];
+        var pr = progress[cat.id] || { completed: [], stars: 0 };
+        currentWordIdx = 0;
+        for (var i = 0; i < cat.words.length; i++) {
+          if (pr.completed.indexOf(i) === -1) {
+            currentWordIdx = i;
+            break;
+          }
+          if (i === cat.words.length - 1) {
+            pr.completed = [];
+            pr.stars = 0;
+            progress[cat.id] = pr;
+            saveProgress();
+            currentWordIdx = 0;
+          }
+        }
+        goScreen("game");
+        buildPuzzle();
+        loadWord();
+        updatePuzzleGlow();
+      }
+
+      // =====================
+      // PUZZLE
+      // =====================
+      function buildPuzzle() {
+        var cat = CATEGORIES[currentCat];
+        var pr = progress[cat.id] || { completed: [], stars: 0 };
+        var n = cat.words.length;
+        var wrap = document.getElementById("puzzle-wrap");
+        wrap.innerHTML = "";
+
+        var bg = document.createElement("div");
+        bg.className = "puzzle-bg";
+        bg.style.background =
+          "radial-gradient(circle," + cat.color + "22,transparent 70%)";
+        wrap.appendChild(bg);
+
+        var cols = Math.ceil(Math.sqrt(n));
+        var rows = Math.ceil(n / cols);
+        for (var i = 0; i < n; i++) {
+          var row = Math.floor(i / cols),
+            col = i % cols;
+          var pw = 100 / cols,
+            ph = 100 / rows;
+          var pc = document.createElement("div");
+          pc.className =
+            "puzzle-piece" +
+            (pr.completed.indexOf(i) !== -1 ? " revealed" : "");
+          pc.id = "puzzle-" + i;
+          pc.style.left = col * pw + "%";
+          pc.style.top = row * ph + "%";
+          pc.style.width = pw + "%";
+          pc.style.height = ph + "%";
+          pc.style.background =
+            "linear-gradient(135deg," + cat.color + "55," + cat.color + "22)";
+          pc.style.border = "1px solid " + cat.color + "33";
+          pc.textContent = cat.words[i].emoji;
+          wrap.appendChild(pc);
+        }
+      }
+
+      function revealPuzzlePiece(idx) {
+        var pc = document.getElementById("puzzle-" + idx);
+        if (pc) {
+          pc.classList.add("revealed", "glow");
+          setTimeout(function () {
+            pc.classList.remove("glow");
+          }, 1000);
+        }
+        // Progressive glow on puzzle
+        updatePuzzleGlow();
+      }
+
+      function updatePuzzleGlow() {
+        var cat = CATEGORIES[currentCat];
+        if (!cat) return;
+        var pr = progress[cat.id] || { completed: [], stars: 0 };
+        var pct = pr.completed.length / cat.words.length;
+        var wrap = document.getElementById("puzzle-wrap");
+        if (!wrap) return;
+        wrap.classList.remove("glow-1", "glow-2", "glow-3", "glow-4");
+        if (pct >= 0.9) wrap.classList.add("glow-4");
+        else if (pct >= 0.6) wrap.classList.add("glow-3");
+        else if (pct >= 0.35) wrap.classList.add("glow-2");
+        else if (pct > 0) wrap.classList.add("glow-1");
+      }
+
+      // =====================
+      // LOAD WORD
+      // =====================
+      function loadWord() {
+        var cat = CATEGORIES[currentCat];
+        var pr = progress[cat.id] || { completed: [], stars: 0 };
+        while (
+          currentWordIdx < cat.words.length &&
+          pr.completed.indexOf(currentWordIdx) !== -1
+        ) {
+          currentWordIdx++;
+        }
+        if (currentWordIdx >= cat.words.length) {
+          showCatComplete();
+          return;
+        }
+
+        var word = cat.words[currentWordIdx];
+        wordStars = 3;
+        hintsUsed = 0;
+        mistakes = 0;
+        filledCount = 0;
+        locked = false;
+
+        document.getElementById("hud-cat").textContent =
+          cat.icon + " " + cat.nameEn;
+        document.getElementById("hud-stars-g").textContent = "⭐ " + totalStars;
+
+        var dotsH = "";
+        for (var i = 0; i < cat.words.length; i++) {
+          var c = "hud-dot";
+          if (pr.completed.indexOf(i) !== -1) c += " done";
+          if (i === currentWordIdx) c += " current";
+          dotsH += '<div class="' + c + '"></div>';
+        }
+        document.getElementById("hud-progress").innerHTML = dotsH;
+
+        document.getElementById("word-emoji").textContent = word.emoji;
+        document.getElementById("word-en").textContent = word.en;
+        document.getElementById("hint-btn").textContent = "💡 Hint";
+
+        var letters = word.pt.split("");
+        currentLetters = letters;
+        var sH = "";
+        for (var j = 0; j < letters.length; j++) {
+          if (letters[j] === " " || letters[j] === "-") {
+            sH +=
+              '<div class="slot filled" style="border:none;background:none;width:12px" data-char="' +
+              letters[j] +
+              '" data-auto="true">' +
+              letters[j] +
+              "</div>";
+          } else {
+            sH +=
+              '<div class="slot" data-idx="' +
+              j +
+              '" data-char="' +
+              letters[j] +
+              '"></div>';
+          }
+        }
+        document.getElementById("slots").innerHTML = sH;
+
+        var tl = letters.filter(function (l) {
+          return l !== " " && l !== "-";
+        });
+        shuffle(tl);
+        var tH = "";
+        for (var k = 0; k < tl.length; k++) {
+          tH +=
+            '<button class="tile" data-letter="' +
+            tl[k] +
+            '" onclick="pickTile(this)">' +
+            tl[k] +
+            "</button>";
+        }
+        document.getElementById("tiles").innerHTML = tH;
+
+        setTimeout(function () {
+          speakWord();
+        }, 400);
+      }
+
+      // =====================
+      // PICK TILE
+      // =====================
+      function pickTile(el) {
+        if (locked || el.classList.contains("used")) return;
+        var letter = el.getAttribute("data-letter");
+        var slots = document.querySelectorAll("#slots .slot");
+        var target = null;
+        for (var i = 0; i < slots.length; i++) {
+          if (
+            !slots[i].classList.contains("filled") &&
+            !slots[i].getAttribute("data-auto")
+          ) {
+            target = slots[i];
+            break;
+          }
+        }
+        if (!target) return;
+        var expected = target.getAttribute("data-char");
+
+        if (letter === expected) {
+          target.textContent = letter;
+          target.classList.add("filled");
+          el.classList.add("used");
+          filledCount++;
+          playTick();
+          var allFilled = true;
+          slots.forEach(function (s) {
+            if (!s.classList.contains("filled") && !s.getAttribute("data-auto"))
+              allFilled = false;
+          });
+          if (allFilled) {
+            locked = true;
+            setTimeout(function () {
+              wordComplete();
+            }, 300);
+          }
+        } else {
+          mistakes++;
+          if (wordStars > 1) wordStars--;
+          el.classList.add("wrong-flash");
+          target.classList.add("wrong");
+          playBuzz();
+          setTimeout(function () {
+            el.classList.remove("wrong-flash");
+            target.classList.remove("wrong");
+          }, 400);
+        }
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (locked) return;
+        var scr = document.getElementById("s-game");
+        if (!scr.classList.contains("active")) return;
+        var key = e.key.toLowerCase();
+        var tiles = document.querySelectorAll("#tiles .tile:not(.used)");
+        for (var i = 0; i < tiles.length; i++) {
+          if (tiles[i].getAttribute("data-letter").toLowerCase() === key) {
+            pickTile(tiles[i]);
+            break;
+          }
+        }
+      });
+
+      // =====================
+      // WORD COMPLETE
+      // =====================
+      function wordComplete() {
+        var cat = CATEGORIES[currentCat];
+        var word = cat.words[currentWordIdx];
+        if (!progress[cat.id]) progress[cat.id] = { completed: [], stars: 0 };
+        if (progress[cat.id].completed.indexOf(currentWordIdx) === -1)
+          progress[cat.id].completed.push(currentWordIdx);
+        progress[cat.id].stars += wordStars;
+        totalStars += wordStars;
+        saveProgress();
+
+        document.querySelectorAll("#slots .slot").forEach(function (s) {
+          if (!s.getAttribute("data-auto")) s.classList.add("correct");
+        });
+        revealPuzzlePiece(currentWordIdx);
+
+        var praises = [
+          "Amazing!",
+          "Incredible!",
+          "You're a star!",
+          "Brilliant!",
+          "Wow!",
+          "Superstar!",
+          "Nailed it!",
+          "Out of this world!",
+          "Fantastic!",
+          "Perfect!",
+        ];
+        setTimeout(function () {
+          document.getElementById("ov-emoji").textContent = word.emoji;
+          document.getElementById("ov-text").textContent =
+            praises[Math.floor(Math.random() * praises.length)];
+          document.getElementById("ov-word").textContent =
+            word.pt + " = " + word.en;
+          document.getElementById("ov-stars").textContent = "⭐".repeat(
+            wordStars,
+          );
+          document.getElementById("ov-success").classList.add("active");
+          playCheer();
+          spawnConfetti();
+          speakWord();
+        }, 500);
+      }
+
+      function nextWord() {
+        document.getElementById("ov-success").classList.remove("active");
+        currentWordIdx++;
+        loadWord();
+      }
+
+      // =====================
+      // CAT COMPLETE
+      // =====================
+      function showCatComplete() {
+        var cat = CATEGORIES[currentCat];
+        var pr = progress[cat.id] || { completed: [], stars: 0 };
+        goScreen("catdone");
+        var gal = document.getElementById("gc-galaxy");
+        gal.textContent = cat.icon;
+        gal.style.setProperty("--gc", cat.color);
+        gal.style.background =
+          "radial-gradient(circle," +
+          cat.color +
+          "66," +
+          cat.color +
+          "22,transparent)";
+        gal.style.boxShadow =
+          "0 0 40px " + cat.color + ",0 0 80px " + cat.color;
+        document.getElementById("gc-title").textContent =
+          cat.nameEn + " Galaxy Restored!";
+        document.getElementById("gc-sub").textContent =
+          "All " +
+          cat.words.length +
+          " words spelled! ⭐ " +
+          pr.stars +
+          " stars earned";
+        spawnConfetti();
+        playCheer();
+        setTimeout(function () {
+          spawnConfetti();
+        }, 800);
+      }
+
+      function exitGame() {
+        document.getElementById("ov-success").classList.remove("active");
+        goHub();
+      }
+
+      // =====================
+      // HINT
+      // =====================
+      function giveHint() {
+        if (locked) return;
+        var slots = document.querySelectorAll("#slots .slot");
+        var target = null;
+        for (var i = 0; i < slots.length; i++) {
+          if (
+            !slots[i].classList.contains("filled") &&
+            !slots[i].getAttribute("data-auto")
+          ) {
+            target = slots[i];
+            break;
+          }
+        }
+        if (!target) return;
+        var expected = target.getAttribute("data-char");
+        target.textContent = expected;
+        target.classList.add("filled", "hint-reveal");
+        filledCount++;
+        var tiles = document.querySelectorAll("#tiles .tile:not(.used)");
+        for (var j = 0; j < tiles.length; j++) {
+          if (tiles[j].getAttribute("data-letter") === expected) {
+            tiles[j].classList.add("used");
+            break;
+          }
+        }
+        hintsUsed++;
+        if (wordStars > 1) wordStars--;
+        document.getElementById("hint-btn").textContent =
+          "💡 (" + hintsUsed + ")";
+        playTick();
+        var allFilled = true;
+        slots.forEach(function (s) {
+          if (!s.classList.contains("filled") && !s.getAttribute("data-auto"))
+            allFilled = false;
+        });
+        if (allFilled) {
+          locked = true;
+          setTimeout(function () {
+            wordComplete();
+          }, 300);
+        }
+      }
+
+      // =====================
+      // SPEECH — Natural Voice Selection
+      // =====================
+      var ptVoice = null,
+        voicesReady = false;
+
+      function scoreVoice(v) {
+        // Score voices by quality — higher = more natural sounding
+        var s = 0,
+          name = v.name.toLowerCase(),
+          lang = v.lang || "";
+        // Premium voices (macOS Sequoia+) — best quality, truly natural
+        if (/premium/.test(name)) s += 200;
+        // Enhanced voices (macOS) — very good quality
+        if (/enhanced/.test(name)) s += 150;
+        // Google TTS voices (Chrome) — natural sounding
+        if (/google/.test(name)) s += 120;
+        // Neural / Natural keywords
+        if (/neural/.test(name)) s += 100;
+        if (/natural/.test(name)) s += 80;
+        // macOS novelty/character voices — very robotic, penalize
+        if (/eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley/i.test(name))
+          s -= 300;
+        // Basic named voices WITHOUT quality keywords are still robotic
+        var hasQuality = /premium|enhanced|google|neural|natural/i.test(name);
+        if (/joana/.test(name)) s += hasQuality ? 30 : -50;
+        if (/catarina/.test(name)) s += hasQuality ? 25 : -40;
+        if (/luciana/.test(name)) s += hasQuality ? 20 : -30;
+        // Penalize compact/low-quality voices heavily
+        if (/compact|espeak|mbrola/.test(name)) s -= 500;
+        // STRONGLY prefer pt-PT over pt-BR — this is a European Portuguese app
+        // pt-BR is still allowed as fallback (score > 0) but pt-PT always wins
+        if (lang === "pt-PT" || lang === "pt_PT") s += 500;
+        else if (lang === "pt-BR" || lang === "pt_BR") s += 5;
+        else if (lang.startsWith("pt")) s += 10;
+        // Non-local voices get a BIG boost (network voices tend to be much better)
+        if (!v.localService) s += 30;
+        return s;
+      }
+
+      function findPtVoice() {
+        if (!window.speechSynthesis) return;
+        var v = speechSynthesis.getVoices();
+        if (!v.length) return;
+        voicesReady = true;
+        // Collect all Portuguese voices with scores
+        var candidates = [];
+        for (var i = 0; i < v.length; i++) {
+          var vo = v[i];
+          var lang = vo.lang || "";
+          if (
+            lang === "pt-PT" ||
+            lang === "pt_PT" ||
+            lang === "pt-BR" ||
+            lang === "pt_BR" ||
+            lang === "pt" ||
+            lang.startsWith("pt-") ||
+            lang.startsWith("pt_")
+          ) {
+            candidates.push({ voice: vo, score: scoreVoice(vo) });
+          }
+        }
+        // Sort by score descending — pick the best
+        candidates.sort(function (a, b) {
+          return b.score - a.score;
+        });
+        if (candidates.length > 0) {
+          ptVoice = candidates[0].voice;
+          console.log(
+            '[SpellingStars] Voice selected: "' +
+              ptVoice.name +
+              '" (' +
+              ptVoice.lang +
+              ") score=" +
+              candidates[0].score +
+              " local=" +
+              ptVoice.localService,
+          );
+          if (candidates.length > 1) {
+            console.log(
+              "[SpellingStars] Other voices:",
+              candidates
+                .slice(1, 5)
+                .map(function (c) {
+                  return c.voice.name + " (" + c.score + ")";
+                })
+                .join(", "),
+            );
+          }
+        } else {
+          ptVoice = null;
+          console.warn("[SpellingStars] No Portuguese voice found");
+        }
+      }
+      if (window.speechSynthesis) {
+        speechSynthesis.onvoiceschanged = findPtVoice;
+        findPtVoice();
+        // Some browsers need retries as voices load async
+        setTimeout(findPtVoice, 500);
+        setTimeout(findPtVoice, 1500);
+        setTimeout(findPtVoice, 3000);
+      }
+
+      // Convert Portuguese word to audio filename
+      function wordToAudioFile(word) {
+        return (
+          "audio/" +
+          word.replace(/ /g, "_").replace(/-/g, "_").toLowerCase() +
+          ".mp3"
+        );
+      }
+
+      function speakWord() {
+        var cat = CATEGORIES[currentCat];
+        if (!cat) return;
+        var w = cat.words[currentWordIdx];
+        if (!w) return;
+        var btn = document.getElementById("speak-btn");
+        btn.classList.add("playing");
+        function done() {
+          btn.classList.remove("playing");
+        }
+
+        // Try pre-recorded MP3 first (Microsoft Neural TTS — pt-PT-RaquelNeural)
+        var audioFile = wordToAudioFile(w.pt);
+        try {
+          var audio = new Audio(audioFile);
+          audio.onended = done;
+          audio.onerror = function () {
+            console.warn(
+              "[SpellingStars] MP3 not found: " +
+                audioFile +
+                ", falling back to SpeechSynthesis",
+            );
+            speakWordFallback(w.pt, done);
+          };
+          audio.play().catch(function () {
+            speakWordFallback(w.pt, done);
+          });
+          return;
+        } catch (e) {
+          // Audio element failed, use fallback
+        }
+        speakWordFallback(w.pt, done);
+      }
+
+      // Fallback: browser SpeechSynthesis (only if MP3 unavailable)
+      function speakWordFallback(text, done) {
+        if (!window.speechSynthesis) {
+          if (done) done();
+          return;
+        }
+        if (!voicesReady || !ptVoice) findPtVoice();
+        try {
+          speechSynthesis.cancel();
+          var u = new SpeechSynthesisUtterance(text);
+          u.lang = "pt-PT";
+          u.rate = 0.85;
+          u.pitch = 1.0;
+          u.volume = 1.0;
+          if (ptVoice) {
+            u.voice = ptVoice;
+            u.lang = ptVoice.lang;
+          }
+          u.onend = function () {
+            if (done) done();
+          };
+          u.onerror = function () {
+            if (done) done();
+          };
+          speechSynthesis.speak(u);
+        } catch (e) {
+          if (done) done();
+        }
+      }
+
+      // =====================
+      // SOUNDS
+      // =====================
+      function playTick() {
+        try {
+          var c = new AudioContext();
+          c.resume();
+          var o = c.createOscillator(),
+            g = c.createGain();
+          o.connect(g);
+          g.connect(c.destination);
+          o.type = "sine";
+          o.frequency.setValueAtTime(880, c.currentTime);
+          o.frequency.exponentialRampToValueAtTime(1320, c.currentTime + 0.08);
+          g.gain.setValueAtTime(0.12, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.12);
+          o.start();
+          o.stop(c.currentTime + 0.12);
+        } catch (e) {}
+      }
+      function playBuzz() {
+        try {
+          var c = new AudioContext();
+          c.resume();
+          var o = c.createOscillator(),
+            g = c.createGain();
+          o.connect(g);
+          g.connect(c.destination);
+          o.type = "sawtooth";
+          o.frequency.setValueAtTime(150, c.currentTime);
+          g.gain.setValueAtTime(0.08, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2);
+          o.start();
+          o.stop(c.currentTime + 0.2);
+        } catch (e) {}
+      }
+      function playCheer() {
+        try {
+          var c = new AudioContext();
+          c.resume();
+          [523, 659, 784, 1047].forEach(function (f, i) {
+            var o = c.createOscillator(),
+              g = c.createGain();
+            o.connect(g);
+            g.connect(c.destination);
+            o.type = "sine";
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.08, c.currentTime + i * 0.1);
+            g.gain.exponentialRampToValueAtTime(
+              0.001,
+              c.currentTime + i * 0.1 + 0.3,
+            );
+            o.start(c.currentTime + i * 0.1);
+            o.stop(c.currentTime + i * 0.1 + 0.3);
+          });
+        } catch (e) {}
+      }
+
+      // =====================
+      // CONFETTI
+      // =====================
+      function spawnConfetti() {
+        var cols = [
+          "#7c3aed",
+          "#ec4899",
+          "#fbbf24",
+          "#10b981",
+          "#3b82f6",
+          "#f59e0b",
+          "#ef4444",
+        ];
+        for (var i = 0; i < 35; i++) {
+          var c = document.createElement("div");
+          c.className = "confetti";
+          c.style.left = 5 + Math.random() * 90 + "%";
+          c.style.background = cols[Math.floor(Math.random() * cols.length)];
+          c.style.setProperty("--d", 1.5 + Math.random() * 2 + "s");
+          c.style.width = 6 + Math.random() * 8 + "px";
+          c.style.height = 6 + Math.random() * 8 + "px";
+          c.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+          document.body.appendChild(c);
+          setTimeout(
+            function (el) {
+              el.remove();
+            }.bind(null, c),
+            4000,
+          );
+        }
+      }
+
+      // =====================
+      // UTILS
+      // =====================
+      function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+      function showToast(m) {
+        var t = document.getElementById("toast");
+        t.textContent = m;
+        t.classList.add("show");
+        setTimeout(function () {
+          t.classList.remove("show");
+        }, 2000);
+      }
+
+      // =====================
+      // INTRO VOICE NARRATION (pre-recorded Microsoft AriaNeural)
+      // =====================
+      var introAudio = null;
+      function narrateIntro() {
+        try {
+          introAudio = new Audio("audio/intro_narration.mp3");
+          introAudio.play().catch(function () {
+            console.warn("[SpellingStars] Intro audio autoplay blocked");
+          });
+        } catch (e) {}
+      }
+      function stopIntroNarration() {
+        // Stop pre-recorded audio
+        if (introAudio) {
+          try {
+            introAudio.pause();
+            introAudio.currentTime = 0;
+          } catch (e) {}
+          introAudio = null;
+        }
+        // Also stop any SpeechSynthesis just in case
+        if (window.speechSynthesis) {
+          try {
+            speechSynthesis.cancel();
+          } catch (e) {}
+        }
+      }
+      // Start narration after a short delay
+      setTimeout(narrateIntro, 800);
+    </script>
+  </body>
+</html>

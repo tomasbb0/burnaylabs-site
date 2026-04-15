@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌊 Explorador do Oceano! - Ocean Explorer!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: linear-gradient(
+          180deg,
+          #0ea5e9 0%,
+          #0369a1 40%,
+          #164e63 100%
+        );
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+      .bubble {
+        position: fixed;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        animation: bubbleRise linear infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+      @keyframes bubbleRise {
+        0% {
+          transform: translateY(0) scale(1);
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-110vh) scale(0.5);
+          opacity: 0;
+        }
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+      .game-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+      }
+      h1 {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 4px;
+        color: #0c4a6e;
+      }
+      h2 {
+        font-size: 1.1rem;
+        text-align: center;
+        color: #0369a1;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      .ocean-display {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin: 20px 0;
+        padding: 24px;
+        background: linear-gradient(180deg, #0284c7, #075985);
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+      }
+      .ocean-display::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 200%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.05),
+          transparent
+        );
+        animation: wave 3s linear infinite;
+      }
+      @keyframes wave {
+        to {
+          transform: translateX(50%);
+        }
+      }
+      .ocean-creature {
+        width: 80px;
+        height: 80px;
+        background: #1e3a5f;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.8rem;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+      }
+      .ocean-creature.unlocked {
+        background: linear-gradient(135deg, #06b6d4, #0284c7);
+        transform: scale(1.1);
+        box-shadow: 0 4px 20px rgba(6, 182, 212, 0.5);
+        animation: swimIn 0.8s ease;
+      }
+      .ocean-creature.locked {
+        opacity: 0.2;
+        filter: grayscale(1) blur(1px);
+      }
+      @keyframes swimIn {
+        0% {
+          transform: scale(0) rotate(-30deg) translateX(-30px);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.2) rotate(5deg);
+        }
+        100% {
+          transform: scale(1.1) rotate(0);
+        }
+      }
+      .depth-meter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .depth-label {
+        font-size: 0.85rem;
+        color: #0369a1;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .depth-bar {
+        flex: 1;
+        height: 14px;
+        background: #e0f2fe;
+        border-radius: 7px;
+        overflow: hidden;
+      }
+      .depth-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0ea5e9, #06b6d4, #14b8a6);
+        border-radius: 7px;
+        transition: width 0.5s ease;
+      }
+      .question-box {
+        background: linear-gradient(135deg, #e0f2fe, #cffafe);
+        border-radius: 16px;
+        padding: 24px;
+        margin: 20px 0;
+        text-align: center;
+        border: 3px solid #7dd3fc;
+      }
+      .question-emoji {
+        font-size: 4.5rem;
+        margin-bottom: 12px;
+        animation: float 3s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0);
+        }
+        50% {
+          transform: translateY(-8px) rotate(3deg);
+        }
+      }
+      .question-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin-bottom: 6px;
+      }
+      .question-hint {
+        font-size: 1rem;
+        color: #0369a1;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .answer-btn {
+        padding: 18px;
+        font-size: 1.15rem;
+        font-weight: 700;
+        border: 3px solid #bae6fd;
+        border-radius: 16px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+      }
+      .answer-btn:hover {
+        border-color: #0ea5e9;
+        background: #e0f2fe;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2);
+      }
+      .answer-btn.correct {
+        background: #d1fae5;
+        border-color: #10b981;
+        animation: correctPop 0.4s ease;
+      }
+      .answer-btn.wrong {
+        background: #fee2e2;
+        border-color: #ef4444;
+        animation: wrongShake 0.4s ease;
+      }
+      @keyframes correctPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .stars {
+        font-size: 1.4rem;
+      }
+      .level-badge {
+        background: linear-gradient(135deg, #0284c7, #06b6d4);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 800;
+      }
+      .celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .celebration-content {
+        background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+        border-radius: 24px;
+        padding: 48px;
+        text-align: center;
+        max-width: 500px;
+        color: white;
+        animation: celebPop 0.5s ease;
+      }
+      @keyframes celebPop {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .celebration h2 {
+        font-size: 2rem;
+        margin: 16px 0;
+        color: white;
+      }
+      .celebration .emoji {
+        font-size: 5rem;
+      }
+      .play-btn {
+        background: white;
+        color: #0284c7;
+        border: none;
+        padding: 16px 48px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 16px;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .confetti {
+        position: fixed;
+        top: -10px;
+        border-radius: 50%;
+        z-index: 150;
+        animation: confettiFall linear forwards;
+        pointer-events: none;
+      }
+      @keyframes confettiFall {
+        to {
+          top: 110vh;
+          transform: rotate(720deg);
+        }
+      }
+      .success-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .success-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .failure-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #ef4444, #f97316);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .failure-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-card">
+        <h1>🌊 Explorador do Oceano!</h1>
+        <h2>Ocean Explorer! — Discover marine animals</h2>
+
+        <div class="progress">
+          <span class="stars" id="stars">⭐⭐⭐⭐⭐</span>
+          <span class="level-badge" id="level">Depth 1</span>
+        </div>
+
+        <div class="depth-meter">
+          <span class="depth-label">🏖️ Surface</span>
+          <div class="depth-bar">
+            <div class="depth-fill" id="depth" style="width: 0%"></div>
+          </div>
+          <span class="depth-label">🐙 Deep</span>
+        </div>
+
+        <div class="ocean-display">
+          <div class="ocean-creature locked" id="part-0">🐠</div>
+          <div class="ocean-creature locked" id="part-1">🐢</div>
+          <div class="ocean-creature locked" id="part-2">🐬</div>
+          <div class="ocean-creature locked" id="part-3">🦈</div>
+          <div class="ocean-creature locked" id="part-4">🐙</div>
+          <div class="ocean-creature locked" id="part-5">🐋</div>
+        </div>
+
+        <div class="question-box">
+          <div class="question-emoji" id="emoji">🐠</div>
+          <div class="question-text" id="question">Loading...</div>
+          <div class="question-hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+      </div>
+    </div>
+
+    <div class="celebration hidden" id="celebration">
+      <div class="celebration-content">
+        <div class="emoji">🌊🐋🎉</div>
+        <h2>Explorador do Oceano!</h2>
+        <p>
+          Descobriste todas as criaturas!<br />You discovered all the creatures!
+        </p>
+        <button class="play-btn" onclick="location.reload()">
+          🌊 Mergulhar Novamente / Dive Again
+        </button>
+      </div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      // Create background bubbles
+      for (let i = 0; i < 15; i++) {
+        const b = document.createElement("div");
+        b.className = "bubble";
+        const size = 10 + Math.random() * 30;
+        b.style.width = size + "px";
+        b.style.height = size + "px";
+        b.style.left = Math.random() * 100 + "vw";
+        b.style.bottom = "-50px";
+        b.style.animationDuration = 5 + Math.random() * 10 + "s";
+        b.style.animationDelay = Math.random() * 5 + "s";
+        document.body.appendChild(b);
+      }
+
+      const levels = [
+        {
+          theme: "Animais da Quinta / Farm Animals",
+          questions: [
+            {
+              emoji: "🐄",
+              q: "Que animal é este?",
+              hint: "What animal? (gives milk)",
+              answer: "Vaca",
+              options: ["Cavalo", "Vaca", "Ovelha", "Cabra"],
+            },
+            {
+              emoji: "🐔",
+              q: "Que animal é este?",
+              hint: "What animal? (gives eggs)",
+              answer: "Galinha",
+              options: ["Pato", "Galinha", "Peru", "Ganso"],
+            },
+            {
+              emoji: "🐷",
+              q: "Que animal é este?",
+              hint: "What animal? (oink oink)",
+              answer: "Porco",
+              options: ["Cão", "Gato", "Porco", "Cavalo"],
+            },
+          ],
+        },
+        {
+          theme: "Animais de Estimação / Pets",
+          questions: [
+            {
+              emoji: "🐶",
+              q: "Que animal é este?",
+              hint: "What animal? (man's best friend)",
+              answer: "Cão",
+              options: ["Gato", "Cão", "Coelho", "Hamster"],
+            },
+            {
+              emoji: "🐱",
+              q: "Que animal é este?",
+              hint: "What animal? (meow meow)",
+              answer: "Gato",
+              options: ["Cão", "Gato", "Rato", "Pássaro"],
+            },
+            {
+              emoji: "🐰",
+              q: "Que animal é este?",
+              hint: "What animal? (big ears, hops)",
+              answer: "Coelho",
+              options: ["Rato", "Esquilo", "Coelho", "Hamster"],
+            },
+          ],
+        },
+        {
+          theme: "No Oceano / In the Ocean",
+          questions: [
+            {
+              emoji: "🐠",
+              q: "Que animal vive no mar?",
+              hint: "What lives in the sea? (swims)",
+              answer: "Peixe",
+              options: ["Pássaro", "Peixe", "Cão", "Gato"],
+            },
+            {
+              emoji: "🐢",
+              q: "Que animal é este?",
+              hint: "What animal? (has a shell, slow)",
+              answer: "Tartaruga",
+              options: ["Cobra", "Sapo", "Tartaruga", "Lagarto"],
+            },
+            {
+              emoji: "🐬",
+              q: "Que animal é este?",
+              hint: "What animal? (very smart, jumps)",
+              answer: "Golfinho",
+              options: ["Baleia", "Tubarão", "Golfinho", "Foca"],
+            },
+          ],
+        },
+        {
+          theme: "Animais Grandes / Big Animals",
+          questions: [
+            {
+              emoji: "🦁",
+              q: "Que animal é o rei da selva?",
+              hint: "Who is the king of the jungle?",
+              answer: "Leão",
+              options: ["Tigre", "Leão", "Urso", "Gorila"],
+            },
+            {
+              emoji: "🐘",
+              q: "Que animal é muito grande?",
+              hint: "What animal is very big? (trunk)",
+              answer: "Elefante",
+              options: ["Girafa", "Elefante", "Rinoceronte", "Hipopótamo"],
+            },
+            {
+              emoji: "🦒",
+              q: "Que animal tem o pescoço comprido?",
+              hint: "What has a long neck?",
+              answer: "Girafa",
+              options: ["Girafa", "Avestruz", "Camelo", "Cobra"],
+            },
+          ],
+        },
+        {
+          theme: "Animais que Voam / Flying Animals",
+          questions: [
+            {
+              emoji: "🦅",
+              q: "Que animal voa no céu?",
+              hint: "What flies in the sky?",
+              answer: "Águia",
+              options: ["Águia", "Gato", "Peixe", "Cobra"],
+            },
+            {
+              emoji: "🦋",
+              q: "Que inseto é muito bonito?",
+              hint: "What insect is very beautiful?",
+              answer: "Borboleta",
+              options: ["Abelha", "Borboleta", "Mosca", "Joaninha"],
+            },
+            {
+              emoji: "🦜",
+              q: "Que pássaro fala?",
+              hint: "What bird talks?",
+              answer: "Papagaio",
+              options: ["Coruja", "Papagaio", "Pombo", "Canário"],
+            },
+          ],
+        },
+        {
+          theme: "O Fundo do Mar / Deep Sea",
+          questions: [
+            {
+              emoji: "🦈",
+              q: "Que animal tem muitos dentes?",
+              hint: "What has many teeth? (scary)",
+              answer: "Tubarão",
+              options: ["Baleia", "Golfinho", "Tubarão", "Peixe"],
+            },
+            {
+              emoji: "🐙",
+              q: "Que animal tem oito braços?",
+              hint: "What has eight arms?",
+              answer: "Polvo",
+              options: ["Lula", "Polvo", "Estrela-do-mar", "Caranguejo"],
+            },
+            {
+              emoji: "🐋",
+              q: "Qual é o maior animal do mundo?",
+              hint: "What is the biggest animal?",
+              answer: "Baleia",
+              options: ["Elefante", "Tubarão", "Girafa", "Baleia"],
+            },
+          ],
+        },
+      ];
+
+      let currentLevel = 0,
+        currentQ = 0,
+        stars = 5,
+        parts = 0,
+        totalQ = 18,
+        answeredQ = 0;
+
+      function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+      }
+
+      function showQuestion() {
+        const level = levels[currentLevel];
+        const q = level.questions[currentQ];
+        document.getElementById("level").textContent =
+          "Depth " + (currentLevel + 1) + ": " + level.theme;
+        document.getElementById("emoji").textContent = q.emoji;
+        document.getElementById("question").textContent = q.q;
+        document.getElementById("hint").textContent = q.hint;
+        document.getElementById("depth").style.width =
+          (answeredQ / totalQ) * 100 + "%";
+
+        const answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        shuffle(q.options).forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "answer-btn";
+          btn.textContent = opt;
+          btn.disabled = false;
+          btn.onclick = () => checkAnswer(opt, q.answer, btn);
+          answersDiv.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected, correct, btn) {
+        const btns = document.querySelectorAll(".answer-btn");
+        btns.forEach((b) => (b.disabled = true));
+        answeredQ++;
+
+        if (selected === correct) {
+          btn.classList.add("correct");
+          setTimeout(() => nextQuestion(), 800);
+          try {
+            playCheerSound();
+          } catch (e) {}
+          try {
+            showSuccessSplash("Boa! 🐬");
+          } catch (e) {}
+        } else {
+          btn.classList.add("wrong");
+          setTimeout(() => nextQuestion(), 1500);
+          try {
+            playOhSound();
+          } catch (e) {}
+          stars = Math.max(0, stars - 1);
+          document.getElementById("stars").textContent =
+            "⭐".repeat(stars) + "☆".repeat(5 - stars);
+          btns.forEach((b) => {
+            if (b.textContent === correct) b.classList.add("correct");
+          });
+          try {
+            showFailureSplash("Quase! 🌊");
+          } catch (e) {}
+        }
+      }
+
+      function nextQuestion() {
+        currentQ++;
+        if (currentQ >= levels[currentLevel].questions.length) {
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.remove("locked");
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.add("unlocked");
+          parts++;
+          try {
+            playPling();
+          } catch (e) {}
+          currentLevel++;
+          currentQ = 0;
+          if (currentLevel >= levels.length) {
+            // Save completion to cloud
+            if (window.GameFirebase && window.GameFirebase.ready) {
+              window.GameFirebase.saveProgress({ completed: true, stars: stars, parts: parts, levelsCompleted: currentLevel });
+            }
+            launchBubbles();
+            setTimeout(
+              () =>
+                document
+                  .getElementById("celebration")
+                  .classList.remove("hidden"),
+              500,
+            );
+            return;
+          }
+        }
+        showQuestion();
+      }
+
+      function launchBubbles() {
+        for (let i = 0; i < 40; i++) {
+          setTimeout(() => {
+            const c = document.createElement("div");
+            c.className = "confetti";
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.background =
+              "rgba(6,182,212," + (0.3 + Math.random() * 0.5) + ")";
+            c.style.animationDuration = 2 + Math.random() * 3 + "s";
+            const s = 8 + Math.random() * 16;
+            c.style.width = s + "px";
+            c.style.height = s + "px";
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 5000);
+          }, i * 60);
+        }
+      }
+      function getAudioContext() {
+        try {
+          return (
+            window._audioCtx ||
+            (window._audioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )())
+          );
+        } catch (e) {
+          return null;
+        }
+      }
+      function playCheerSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        [1046, 1319, 1568].forEach((f, i) => {
+          const o = ctx.createOscillator(),
+            g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(f, now + i * 0.05);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + i * 0.05);
+          o.stop(now + 0.55);
+        });
+      }
+      function playOhSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(350, now);
+        o.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.7);
+      }
+      function playPling() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "triangle";
+        o.frequency.setValueAtTime(1320, now);
+        o.frequency.exponentialRampToValueAtTime(660, now + 0.12);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.28);
+      }
+      function showSuccessSplash(text) {
+        const s = document.createElement("div");
+        s.className = "success-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 800);
+      }
+      function showFailureSplash(text) {
+        const s = document.createElement("div");
+        s.className = "failure-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 1200);
+      }
+
+      showQuestion();
+    </script>
+  </body>
+</html>

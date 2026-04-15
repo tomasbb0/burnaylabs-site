@@ -1,0 +1,2710 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Simon Says" />
+    <title>Simon Says — Portuguese!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: #0b0716;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* === Animated BG === */
+      .bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .bg-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.18;
+        animation: orbMove 20s ease-in-out infinite alternate;
+      }
+      .bg-orb:nth-child(1) {
+        width: 500px;
+        height: 500px;
+        background: #7c3aed;
+        top: -10%;
+        left: -10%;
+        animation-delay: 0s;
+      }
+      .bg-orb:nth-child(2) {
+        width: 400px;
+        height: 400px;
+        background: #ec4899;
+        bottom: -10%;
+        right: -10%;
+        animation-delay: -7s;
+      }
+      .bg-orb:nth-child(3) {
+        width: 350px;
+        height: 350px;
+        background: #f59e0b;
+        top: 50%;
+        left: 60%;
+        animation-delay: -14s;
+      }
+      @keyframes orbMove {
+        0% {
+          transform: translate(0, 0) scale(1);
+        }
+        50% {
+          transform: translate(60px, -40px) scale(1.15);
+        }
+        100% {
+          transform: translate(-30px, 50px) scale(0.9);
+        }
+      }
+
+      /* === Container === */
+      .game-wrap {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 480px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* === Screens === */
+      .screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .screen.active {
+        display: flex;
+      }
+
+      /* === WELCOME === */
+      .logo {
+        font-size: 5rem;
+        margin-bottom: 4px;
+        animation: logoBounce 2.5s ease-in-out infinite;
+      }
+      @keyframes logoBounce {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-12px) rotate(-3deg);
+        }
+        75% {
+          transform: translateY(-6px) rotate(2deg);
+        }
+      }
+      .title {
+        font-size: clamp(1.8rem, 5vw, 2.6rem);
+        font-weight: 900;
+        background: linear-gradient(135deg, #a78bfa, #ec4899, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+      }
+      .subtitle {
+        color: #9b8fc2;
+        font-size: 1rem;
+        margin: 4px 0 24px;
+        font-weight: 600;
+      }
+      .desc {
+        color: #7b6fa0;
+        font-size: 0.9rem;
+        max-width: 340px;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+
+      .big-btn {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        border: none;
+        color: #fff;
+        padding: 16px 56px;
+        font-size: 1.25rem;
+        font-weight: 800;
+        border-radius: 50px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: 0.2s;
+        box-shadow: 0 6px 30px rgba(124, 58, 237, 0.45);
+        position: relative;
+        overflow: hidden;
+      }
+      .big-btn:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 10px 40px rgba(124, 58, 237, 0.6);
+      }
+      .big-btn:active {
+        transform: scale(0.97);
+      }
+      .big-btn .shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        animation: shine 2.5s infinite;
+      }
+      @keyframes shine {
+        to {
+          left: 100%;
+        }
+      }
+
+      /* === TUTORIAL === */
+      .tut-card {
+        background: rgba(26, 17, 40, 0.9);
+        border: 1px solid rgba(167, 139, 250, 0.15);
+        border-radius: 20px;
+        padding: 32px 24px;
+        backdrop-filter: blur(20px);
+        width: 100%;
+        max-width: 400px;
+      }
+      .tut-step {
+        display: none;
+        animation: fadeUp 0.4s ease;
+      }
+      .tut-step.active {
+        display: block;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .tut-icon {
+        font-size: 4rem;
+        margin-bottom: 10px;
+      }
+      .tut-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #a78bfa;
+        margin-bottom: 8px;
+      }
+      .tut-text {
+        color: #9b8fc2;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .tut-text b {
+        color: #fff;
+      }
+      .tut-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+      .tut-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(167, 139, 250, 0.2);
+        transition: 0.3s;
+      }
+      .tut-dot.on {
+        background: #a78bfa;
+        width: 20px;
+        border-radius: 4px;
+      }
+      .tut-btn {
+        background: #7c3aed;
+        border: none;
+        color: #fff;
+        padding: 12px 36px;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: 0.2s;
+      }
+      .tut-btn:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+
+      /* === HUD === */
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        background: rgba(26, 17, 40, 0.7);
+        border-radius: 14px;
+        border: 1px solid rgba(167, 139, 250, 0.1);
+        margin-bottom: 12px;
+        backdrop-filter: blur(10px);
+        flex-shrink: 0;
+      }
+      .hud-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .hud-score {
+        color: #f59e0b;
+      }
+      .hud-lives {
+        display: flex;
+        gap: 2px;
+      }
+      .heart {
+        font-size: 1.1rem;
+        transition: 0.3s;
+      }
+      .heart.dead {
+        filter: grayscale(1);
+        opacity: 0.25;
+        transform: scale(0.7);
+      }
+      .hud-round {
+        color: #a78bfa;
+      }
+
+      /* === SIMON AREA === */
+      .simon-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 17, 40, 0.5);
+        border-radius: 20px;
+        border: 1px solid rgba(167, 139, 250, 0.08);
+        padding: 28px 20px;
+        margin-bottom: 12px;
+        position: relative;
+        overflow: hidden;
+        min-height: 220px;
+      }
+      .simon-bg-glow {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(124, 58, 237, 0.12),
+          transparent 70%
+        );
+        animation: glowPulse 4s ease-in-out infinite;
+      }
+      @keyframes glowPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.4;
+        }
+        50% {
+          transform: scale(1.3);
+          opacity: 0.7;
+        }
+      }
+      .wizard {
+        font-size: 4.5rem;
+        position: relative;
+        z-index: 1;
+        transition: 0.2s;
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+      }
+      .wizard.talk {
+        animation: wizTalk 0.12s ease infinite alternate;
+      }
+      @keyframes wizTalk {
+        from {
+          transform: scale(1) rotate(-1deg);
+        }
+        to {
+          transform: scale(1.06) rotate(1deg);
+        }
+      }
+
+      .bubble {
+        position: relative;
+        z-index: 1;
+        background: rgba(167, 139, 250, 0.12);
+        border: 1.5px solid rgba(167, 139, 250, 0.25);
+        border-radius: 16px;
+        padding: 12px 20px;
+        margin-top: 12px;
+        min-height: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 360px;
+      }
+      .bubble-prefix {
+        font-size: 0.85rem;
+        color: #9b8fc2;
+        font-weight: 600;
+      }
+      .bubble-cmd {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #f59e0b;
+        margin: 2px 0;
+      }
+      .bubble-en {
+        font-size: 0.8rem;
+        color: #7b6fa0;
+        font-weight: 500;
+      }
+
+      /* Trick round styling — no "Simão diz" */
+      .bubble.trick {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.35);
+      }
+      .bubble.trick .bubble-cmd {
+        color: #ef4444;
+      }
+      .bubble-trick-tag {
+        display: none;
+        font-size: 0.7rem;
+        color: #ef4444;
+        font-weight: 700;
+        background: rgba(239, 68, 68, 0.12);
+        border-radius: 6px;
+        padding: 2px 8px;
+        margin-top: 4px;
+      }
+      .bubble.trick .bubble-trick-tag {
+        display: inline-block;
+      }
+
+      /* Road progress */
+      .road-wrap {
+        width: 100%;
+        max-width: 400px;
+        margin: 8px auto 4px;
+        position: relative;
+        height: 38px;
+      }
+      .road {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        right: 0;
+        height: 18px;
+        background: #475569;
+        border-radius: 9px;
+        overflow: hidden;
+      }
+      .road-dashes {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: repeating-linear-gradient(
+          90deg,
+          #fff 0 8px,
+          transparent 8px 18px
+        );
+        opacity: 0.4;
+      }
+      .road-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: linear-gradient(90deg, #34d399, #10b981);
+        border-radius: 9px;
+        transition: width 0.5s ease;
+        width: 0;
+      }
+      .road-car {
+        position: absolute;
+        top: 0;
+        font-size: 24px;
+        line-height: 38px;
+        transition: left 0.5s ease;
+        left: 0;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        z-index: 2;
+        transform: scaleX(-1);
+      }
+      .road-flag {
+        position: absolute;
+        top: 2px;
+        right: -2px;
+        font-size: 18px;
+        line-height: 38px;
+        z-index: 1;
+      }
+
+      .replay-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(167, 139, 250, 0.2);
+        border: 1px solid rgba(167, 139, 250, 0.25);
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.1rem;
+        z-index: 2;
+        transition: 0.2s;
+        color: #fff;
+      }
+      .replay-btn:hover {
+        background: rgba(167, 139, 250, 0.4);
+        transform: scale(1.1);
+      }
+      .replay-btn.on {
+        animation: speakPulse 0.5s ease infinite;
+      }
+      @keyframes speakPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(167, 139, 250, 0);
+        }
+      }
+
+      /* === ACTIONS === */
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .act {
+        padding: 6px;
+        border-radius: 14px;
+        border: 2.5px solid transparent;
+        font-family: inherit;
+        cursor: pointer;
+        transition: 0.15s;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .act::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.08),
+          transparent
+        );
+        border-radius: 11px;
+        pointer-events: none;
+      }
+      .act:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+      .act:active {
+        transform: scale(0.96);
+      }
+      .act-illust {
+        width: 100%;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+      .act-illust svg {
+        width: 80px;
+        height: 80px;
+      }
+      /* Stick figure base styles */
+      .sf-head {
+        fill: #ffd93d;
+        stroke: #333;
+        stroke-width: 2;
+      }
+      .sf-body,
+      .sf-arm,
+      .sf-leg {
+        stroke: #333;
+        stroke-width: 3;
+        stroke-linecap: round;
+        fill: none;
+      }
+      .sf-eye {
+        fill: #333;
+      }
+      .sf-mouth {
+        stroke: #333;
+        stroke-width: 2;
+        fill: none;
+      }
+      .sf-note {
+        fill: #ff6b6b;
+        font-size: 14px;
+      }
+      .sf-extra {
+        fill: #4fc3f7;
+      }
+
+      /* Action animations */
+      @keyframes sfJump {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+      }
+      @keyframes sfClap {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        50% {
+          transform: rotate(15deg);
+        }
+      }
+      @keyframes sfClapR {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        50% {
+          transform: rotate(-15deg);
+        }
+      }
+      @keyframes sfDance {
+        0%,
+        100% {
+          transform: rotate(-8deg);
+        }
+        50% {
+          transform: rotate(8deg);
+        }
+      }
+      @keyframes sfSpin {
+        from {
+          transform: rotateY(0deg);
+        }
+        to {
+          transform: rotateY(360deg);
+        }
+      }
+      @keyframes sfWave {
+        0%,
+        100% {
+          transform: rotate(-20deg);
+        }
+        50% {
+          transform: rotate(20deg);
+        }
+      }
+      @keyframes sfShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-3px);
+        }
+        75% {
+          transform: translateX(3px);
+        }
+      }
+      @keyframes sfFloat {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+      @keyframes sfStomp {
+        0%,
+        80% {
+          transform: translateY(0);
+        }
+        90% {
+          transform: translateY(3px);
+        }
+      }
+      @keyframes sfRun {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+      }
+      @keyframes sfBob {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-3px) scale(1.05);
+        }
+      }
+      @keyframes sfNod {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        50% {
+          transform: rotate(10deg);
+        }
+      }
+      @keyframes sfPulse {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes sfNoteFloat {
+        0% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+      }
+      @keyframes sfBlowAir {
+        0% {
+          transform: scaleX(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scaleX(3) translateX(10px);
+          opacity: 0;
+        }
+      }
+
+      .act-gif {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .act-emoji {
+        font-size: 2.8rem;
+        padding: 8px 0;
+        display: inline-block;
+      }
+      /* Emoji animations */
+      .anim-jump .act-emoji {
+        animation: emojiJump 0.5s ease infinite;
+      }
+      .anim-clap .act-emoji {
+        animation: emojiClap 0.4s ease infinite;
+      }
+      .anim-dance .act-emoji {
+        animation: emojiDance 0.6s ease-in-out infinite;
+      }
+      .anim-sit .act-emoji {
+        animation: emojiSit 0.8s ease infinite;
+      }
+      .anim-spin .act-emoji {
+        animation: emojiSpin 1s linear infinite;
+      }
+      .anim-wave .act-emoji {
+        animation: emojiWave 0.4s ease-in-out infinite alternate;
+      }
+      .anim-shake .act-emoji {
+        animation: emojiShake 0.3s ease infinite;
+      }
+      .anim-pulse .act-emoji {
+        animation: emojiPulse 0.8s ease-in-out infinite;
+      }
+      .anim-stomp .act-emoji {
+        animation: emojiStomp 0.3s ease infinite;
+      }
+      .anim-fly .act-emoji {
+        animation: emojiFly 1.2s ease-in-out infinite;
+      }
+      .anim-run .act-emoji {
+        animation: emojiRun 0.3s linear infinite;
+      }
+      @keyframes emojiJump {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+      @keyframes emojiClap {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+      }
+      @keyframes emojiDance {
+        0% {
+          transform: rotate(-8deg);
+        }
+        50% {
+          transform: rotate(8deg);
+        }
+        100% {
+          transform: rotate(-8deg);
+        }
+      }
+      @keyframes emojiSit {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(6px);
+        }
+      }
+      @keyframes emojiSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes emojiWave {
+        from {
+          transform: rotate(-15deg);
+        }
+        to {
+          transform: rotate(15deg);
+        }
+      }
+      @keyframes emojiShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-4px);
+        }
+        75% {
+          transform: translateX(4px);
+        }
+      }
+      @keyframes emojiPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 0.85;
+        }
+      }
+      @keyframes emojiStomp {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(4px) scale(1.1);
+        }
+      }
+      @keyframes emojiFly {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(4px, -6px);
+        }
+        75% {
+          transform: translate(-4px, -3px);
+        }
+      }
+      @keyframes emojiRun {
+        0% {
+          transform: translateX(-4px);
+        }
+        50% {
+          transform: translateX(4px);
+        }
+        100% {
+          transform: translateX(-4px);
+        }
+      }
+      .act-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 4px 0 2px;
+      }
+      .act-hint {
+        font-size: 0.65rem;
+        opacity: 0.6;
+        font-weight: 500;
+        padding-bottom: 2px;
+      }
+      .act.c-green {
+        background: #10b981;
+        border-color: #059669;
+      }
+      .act.c-red {
+        background: #ef4444;
+        border-color: #dc2626;
+      }
+      .act.c-blue {
+        background: #3b82f6;
+        border-color: #2563eb;
+      }
+      .act.c-orange {
+        background: #f59e0b;
+        border-color: #d97706;
+      }
+      .act.c-pink {
+        background: #ec4899;
+        border-color: #db2777;
+      }
+      .act.c-purple {
+        background: #7c3aed;
+        border-color: #6d28d9;
+      }
+      .act.c-teal {
+        background: #14b8a6;
+        border-color: #0d9488;
+      }
+      .act.correct-pop {
+        animation: popGreen 0.5s ease;
+      }
+      @keyframes popGreen {
+        0% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+        }
+        50% {
+          box-shadow: 0 0 30px 8px rgba(16, 185, 129, 0.3);
+          transform: scale(1.04);
+        }
+        100% {
+          box-shadow: none;
+        }
+      }
+      .act.wrong-pop {
+        animation: popRed 0.5s ease;
+      }
+      @keyframes popRed {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8);
+        }
+        50% {
+          box-shadow: 0 0 30px 8px rgba(239, 68, 68, 0.3);
+          transform: scale(0.95);
+        }
+        100% {
+          box-shadow: none;
+        }
+      }
+
+      /* === TOAST === */
+      .toast {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-30px);
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        z-index: 999;
+        opacity: 0;
+        transition: 0.3s cubic-bezier(0.22, 0.9, 0.25, 1);
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .toast.ok {
+        background: linear-gradient(135deg, #10b981, #06b6d4);
+        box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+      }
+      .toast.bad {
+        background: linear-gradient(135deg, #ef4444, #f97316);
+        box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
+      }
+      .toast.trick {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
+      }
+
+      /* === COMBO === */
+      .combo {
+        position: fixed;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        opacity: 0;
+        transition: 0.3s;
+        z-index: 50;
+      }
+      .combo.on {
+        opacity: 1;
+      }
+      .combo-fire {
+        font-size: 1.3rem;
+        animation: fireBob 0.4s ease infinite alternate;
+      }
+      @keyframes fireBob {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.25);
+        }
+      }
+      .combo-num {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #f59e0b;
+        text-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+      }
+      .combo-lbl {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #a78bfa;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      /* === RESULTS === */
+      .res-card {
+        background: rgba(26, 17, 40, 0.9);
+        border: 1px solid rgba(167, 139, 250, 0.15);
+        border-radius: 20px;
+        padding: 32px 24px;
+        backdrop-filter: blur(20px);
+        width: 100%;
+        max-width: 420px;
+      }
+      .res-emoji {
+        font-size: 4rem;
+        margin-bottom: 8px;
+      }
+      .res-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin-bottom: 4px;
+      }
+      .res-sub {
+        color: #9b8fc2;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+      }
+      .res-stars {
+        font-size: 2rem;
+        letter-spacing: 6px;
+        margin-bottom: 16px;
+      }
+      .res-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .stat {
+        background: rgba(37, 27, 58, 0.8);
+        border-radius: 10px;
+        padding: 12px 4px;
+      }
+      .stat-val {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #f59e0b;
+      }
+      .stat-lbl {
+        font-size: 0.7rem;
+        color: #9b8fc2;
+        margin-top: 2px;
+      }
+      .words-box {
+        background: rgba(37, 27, 58, 0.6);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: left;
+        margin-bottom: 16px;
+      }
+      .words-box h4 {
+        font-size: 0.8rem;
+        color: #a78bfa;
+        margin-bottom: 6px;
+      }
+      .word-tag {
+        display: inline-block;
+        background: rgba(167, 139, 250, 0.12);
+        border: 1px solid rgba(167, 139, 250, 0.15);
+        border-radius: 6px;
+        padding: 2px 8px;
+        margin: 2px;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .again-btn {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        border: none;
+        color: #fff;
+        padding: 14px 44px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        border-radius: 50px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: 0.2s;
+        box-shadow: 0 6px 24px rgba(124, 58, 237, 0.4);
+      }
+      .again-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+      }
+
+      /* === CONFETTI === */
+      .confetti {
+        position: fixed;
+        z-index: 800;
+        animation: fall linear forwards;
+        pointer-events: none;
+      }
+      @keyframes fall {
+        0% {
+          transform: translateY(-5vh) rotate(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(105vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* === Responsive === */
+      @media (max-width: 380px) {
+        .wizard {
+          font-size: 3.5rem;
+        }
+        .bubble-cmd {
+          font-size: 1.15rem;
+        }
+        .act {
+          padding: 10px 6px;
+        }
+        .act-emoji {
+          font-size: 1.3rem;
+        }
+        .combo {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg">
+      <div class="bg-orb"></div>
+      <div class="bg-orb"></div>
+      <div class="bg-orb"></div>
+    </div>
+
+    <div class="game-wrap">
+      <!-- WELCOME -->
+      <div class="screen active" id="s-welcome">
+        <div class="logo">🧙‍♂️</div>
+        <div class="title">Simon Says!</div>
+        <div class="subtitle">Simão Diz — Portuguese Edition</div>
+        <p class="desc">
+          O feiticeiro Simão dá ordens em Português!<br />
+          Ouve bem e faz a ação certa… mas cuidado com os truques! 🎭
+        </p>
+        <button class="big-btn" onclick="showTutorial()">
+          <span class="shine"></span>
+          🎮 Jogar! / Play!
+        </button>
+      </div>
+
+      <!-- TUTORIAL -->
+      <div class="screen" id="s-tutorial">
+        <div class="tut-card">
+          <div class="tut-step active" data-s="0">
+            <div class="tut-icon">👂</div>
+            <div class="tut-title">Listen to Simon!</div>
+            <div class="tut-text">
+              Simon speaks in <b>Portuguese</b>.<br />
+              He'll say a command like <b>"Salta!"</b> (Jump!)<br /><br />
+              Tap 🔊 to hear it again!
+            </div>
+          </div>
+          <div class="tut-step" data-s="1">
+            <div class="tut-icon">✅</div>
+            <div class="tut-title">Do the right action!</div>
+            <div class="tut-text">
+              If Simon says <b>"Simão diz: salta!"</b>,<br />
+              tap the <b>🦘 Jump</b> button!<br /><br />
+              Match the command to the action.
+            </div>
+          </div>
+          <div class="tut-step" data-s="2">
+            <div class="tut-icon">⚠️</div>
+            <div class="tut-title">Watch for tricks!</div>
+            <div class="tut-text">
+              If he does <b>NOT</b> say "Simão diz"…<br />
+              <b>Don't move!</b> Tap <b>🚫 Do nothing!</b><br /><br />
+              It's a trap! 😈
+            </div>
+          </div>
+          <div class="tut-step" data-s="3">
+            <div class="tut-icon">🏆</div>
+            <div class="tut-title">Score big!</div>
+            <div class="tut-text">
+              <b>Fast answers = more points</b><br />
+              <b>Combos = bonus!</b> 🔥<br />
+              You have <b>3 lives</b> ❤️❤️❤️<br /><br />
+              Good luck!
+            </div>
+          </div>
+          <div class="tut-dots" id="tut-dots">
+            <div class="tut-dot on"></div>
+            <div class="tut-dot"></div>
+            <div class="tut-dot"></div>
+            <div class="tut-dot"></div>
+          </div>
+          <button class="tut-btn" id="tut-btn" onclick="tutNext()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- GAME -->
+      <div class="screen" id="s-game">
+        <div class="hud">
+          <div class="hud-item hud-score">⭐ <span id="score">0</span></div>
+          <div class="hud-item">
+            <div class="hud-lives" id="lives">
+              <span class="heart">❤️</span><span class="heart">❤️</span
+              ><span class="heart">❤️</span>
+            </div>
+          </div>
+          <div class="hud-item hud-round">🎯 <span id="round">1/15</span></div>
+        </div>
+        <div class="road-wrap">
+          <div class="road">
+            <div class="road-dashes"></div>
+            <div class="road-fill" id="road-fill"></div>
+          </div>
+          <div class="road-car" id="road-car">🚗</div>
+          <div class="road-flag">🏁</div>
+        </div>
+        <div class="simon-box" id="simon-box">
+          <button class="replay-btn" id="replay-btn" onclick="replay()">
+            🔊
+          </button>
+          <div class="simon-bg-glow"></div>
+          <div class="wizard" id="wizard">🧙‍♂️</div>
+          <div class="bubble" id="bubble">
+            <span class="bubble-prefix" id="b-prefix"></span>
+            <span class="bubble-cmd" id="b-cmd">…</span>
+            <span class="bubble-en" id="b-en"></span>
+            <span class="bubble-trick-tag">⚠️ Simon didn't say!</span>
+          </div>
+        </div>
+        <div class="actions" id="actions"></div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="screen" id="s-results">
+        <div class="res-card">
+          <div class="res-emoji" id="r-emoji">🎉</div>
+          <div class="res-title" id="r-title">Great!</div>
+          <div class="res-sub" id="r-sub">Well played!</div>
+          <div class="res-stars" id="r-stars">⭐⭐⭐</div>
+          <div class="res-stats">
+            <div class="stat">
+              <div class="stat-val" id="r-score">0</div>
+              <div class="stat-lbl">Points</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" id="r-correct">0</div>
+              <div class="stat-lbl">Correct</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" id="r-streak">0</div>
+              <div class="stat-lbl">Best Combo</div>
+            </div>
+          </div>
+          <div class="words-box" id="words-box">
+            <h4>📚 Words you practiced:</h4>
+            <div id="words-list"></div>
+          </div>
+          <button class="again-btn" onclick="goHome()">🔄 Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    <!-- Combo -->
+    <div class="combo" id="combo">
+      <div class="combo-fire">🔥</div>
+      <div class="combo-num" id="combo-num">2</div>
+      <div class="combo-lbl">COMBO</div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      // ======= DATA =======
+      var CMDS = [
+        {
+          id: "jump",
+          pt: "Salta!",
+          en: "Jump!",
+          emoji: "🦘",
+          c: "c-green",
+          gif: "gifs/jump.gif",
+        },
+        {
+          id: "clap",
+          pt: "Bate palmas!",
+          en: "Clap!",
+          emoji: "👏",
+          c: "c-blue",
+          gif: "gifs/clap.gif",
+        },
+        {
+          id: "dance",
+          pt: "Dança!",
+          en: "Dance!",
+          emoji: "💃",
+          c: "c-pink",
+          gif: "gifs/dance.gif",
+        },
+        {
+          id: "sit",
+          pt: "Senta-te!",
+          en: "Sit down!",
+          emoji: "🪑",
+          c: "c-orange",
+          gif: "gifs/sit.gif",
+        },
+        {
+          id: "spin",
+          pt: "Roda!",
+          en: "Spin!",
+          emoji: "🌀",
+          c: "c-purple",
+          gif: "gifs/spin.gif",
+        },
+        {
+          id: "wave",
+          pt: "Acena!",
+          en: "Wave!",
+          emoji: "👋",
+          c: "c-teal",
+          gif: "gifs/wave.gif",
+        },
+        {
+          id: "laugh",
+          pt: "Ri-te!",
+          en: "Laugh!",
+          emoji: "😂",
+          c: "c-orange",
+          gif: "gifs/laugh.gif",
+        },
+        {
+          id: "sing",
+          pt: "Canta!",
+          en: "Sing!",
+          emoji: "🎤",
+          c: "c-pink",
+          gif: "gifs/sing.gif",
+        },
+        {
+          id: "whisper",
+          pt: "Sussurra!",
+          en: "Whisper!",
+          emoji: "🤫",
+          c: "c-purple",
+          gif: "gifs/whisper.gif",
+        },
+        {
+          id: "nose",
+          pt: "Toca no nariz!",
+          en: "Touch your nose!",
+          emoji: "👃",
+          c: "c-green",
+          gif: "gifs/nose.gif",
+        },
+        {
+          id: "eyes",
+          pt: "Toca nos olhos!",
+          en: "Touch your eyes!",
+          emoji: "👀",
+          c: "c-blue",
+          gif: "gifs/eyes.gif",
+        },
+        {
+          id: "hand",
+          pt: "Levanta a mão!",
+          en: "Raise your hand!",
+          emoji: "✋",
+          c: "c-orange",
+          gif: "gifs/hand.gif",
+        },
+        {
+          id: "stomp",
+          pt: "Bate o pé!",
+          en: "Stomp!",
+          emoji: "🦶",
+          c: "c-red",
+          gif: "gifs/stomp.gif",
+        },
+        {
+          id: "fly",
+          pt: "Voa!",
+          en: "Fly!",
+          emoji: "🦅",
+          c: "c-purple",
+          gif: "gifs/fly.gif",
+        },
+        {
+          id: "run",
+          pt: "Corre!",
+          en: "Run!",
+          emoji: "🏃",
+          c: "c-green",
+          gif: "gifs/run.gif",
+        },
+        {
+          id: "stretch",
+          pt: "Estica-te!",
+          en: "Stretch!",
+          emoji: "🧘",
+          c: "c-pink",
+          gif: "gifs/stretch.gif",
+        },
+        {
+          id: "blow",
+          pt: "Sopra!",
+          en: "Blow!",
+          emoji: "🌬️",
+          c: "c-teal",
+          gif: "gifs/blow.gif",
+        },
+        {
+          id: "look",
+          pt: "Olha!",
+          en: "Look!",
+          emoji: "👁️",
+          c: "c-blue",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "listen",
+          pt: "Ouve!",
+          en: "Listen!",
+          emoji: "👂",
+          c: "c-purple",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "eat",
+          pt: "Come!",
+          en: "Eat!",
+          emoji: "🍽️",
+          c: "c-orange",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "drink",
+          pt: "Bebe!",
+          en: "Drink!",
+          emoji: "🥤",
+          c: "c-teal",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "sleep",
+          pt: "Dorme!",
+          en: "Sleep!",
+          emoji: "😴",
+          c: "c-purple",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "play",
+          pt: "Brinca!",
+          en: "Play!",
+          emoji: "🎮",
+          c: "c-green",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "stand_up",
+          pt: "Levanta-te!",
+          en: "Stand up!",
+          emoji: "🧍",
+          c: "c-green",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "walk",
+          pt: "Anda!",
+          en: "Walk!",
+          emoji: "🚶",
+          c: "c-blue",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "stop",
+          pt: "Para!",
+          en: "Stop!",
+          emoji: "🛑",
+          c: "c-red",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "shout",
+          pt: "Grita!",
+          en: "Shout!",
+          emoji: "📣",
+          c: "c-orange",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "smile",
+          pt: "Sorri!",
+          en: "Smile!",
+          emoji: "😊",
+          c: "c-pink",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "hug",
+          pt: "Abraça!",
+          en: "Hug!",
+          emoji: "🤗",
+          c: "c-pink",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "kick",
+          pt: "Chuta!",
+          en: "Kick!",
+          emoji: "🦵",
+          c: "c-green",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "point",
+          pt: "Aponta!",
+          en: "Point!",
+          emoji: "👆",
+          c: "c-blue",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "breathe",
+          pt: "Respira!",
+          en: "Breathe!",
+          emoji: "🧘",
+          c: "c-purple",
+          gif: "gifs/nothing.gif",
+        },
+        {
+          id: "draw",
+          pt: "Desenha!",
+          en: "Draw!",
+          emoji: "✏️",
+          c: "c-orange",
+          gif: "gifs/nothing.gif",
+        },
+      ];
+
+      // ======= STATE =======
+      var pts = 0,
+        lives = 3,
+        rnd = 0,
+        TOTAL = 15,
+        streak = 0,
+        best = 0,
+        correct = 0;
+      var curCmd = null,
+        simonSays = true,
+        locked = false,
+        tutStep = 0;
+      var words = new Set(),
+        lastSpeak = "";
+
+      // ======= SCREENS =======
+      function go(id) {
+        document.querySelectorAll(".screen").forEach(function (s) {
+          s.classList.remove("active");
+        });
+        document.getElementById("s-" + id).classList.add("active");
+      }
+
+      // ======= TUTORIAL =======
+      function showTutorial() {
+        tutStep = 0;
+        go("tutorial");
+        updTut();
+      }
+      function updTut() {
+        document.querySelectorAll(".tut-step").forEach(function (s) {
+          s.classList.remove("active");
+        });
+        document.querySelectorAll(".tut-step")[tutStep].classList.add("active");
+        document.querySelectorAll(".tut-dot").forEach(function (d, i) {
+          d.classList.toggle("on", i === tutStep);
+        });
+        document.getElementById("tut-btn").textContent =
+          tutStep === 3 ? "🎮 Let's go!" : "Next →";
+      }
+      function tutNext() {
+        if (tutStep < 3) {
+          tutStep++;
+          updTut();
+        } else {
+          startGame();
+        }
+      }
+
+      // ======= VOICE — Natural Voice Selection (Portugal Portuguese) =======
+      var ptVoice = null;
+      var voicesReady = false;
+
+      function scoreVoice(v) {
+        var s = 0,
+          name = v.name.toLowerCase(),
+          lang = v.lang || "";
+        if (/premium/.test(name)) s += 200;
+        if (/enhanced/.test(name)) s += 150;
+        if (/google/.test(name)) s += 120;
+        if (/neural/.test(name)) s += 100;
+        if (/natural/.test(name)) s += 80;
+        if (/eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley/i.test(name))
+          s -= 300;
+        var hasQuality = /premium|enhanced|google|neural|natural/i.test(name);
+        if (/joana/.test(name)) s += hasQuality ? 30 : -50;
+        if (/catarina/.test(name)) s += hasQuality ? 25 : -40;
+        if (/luciana/.test(name)) s += hasQuality ? 20 : -30;
+        if (/compact|espeak|mbrola/.test(name)) s -= 500;
+        if (lang === "pt-PT" || lang === "pt_PT") s += 40;
+        else if (lang === "pt-BR" || lang === "pt_BR") s += 20;
+        else if (lang.startsWith("pt")) s += 10;
+        if (!v.localService) s += 50;
+        return s;
+      }
+
+      function findPtVoice() {
+        if (!window.speechSynthesis) return;
+        var voices = speechSynthesis.getVoices();
+        if (!voices.length) return;
+        voicesReady = true;
+        var candidates = [];
+        for (var i = 0; i < voices.length; i++) {
+          var v = voices[i];
+          var lang = v.lang || "";
+          if (
+            lang === "pt-PT" ||
+            lang === "pt_PT" ||
+            lang === "pt-BR" ||
+            lang === "pt_BR" ||
+            lang === "pt" ||
+            lang.startsWith("pt-") ||
+            lang.startsWith("pt_")
+          ) {
+            candidates.push({ voice: v, score: scoreVoice(v) });
+          }
+        }
+        candidates.sort(function (a, b) {
+          return b.score - a.score;
+        });
+        if (candidates.length > 0) {
+          ptVoice = candidates[0].voice;
+          console.log(
+            '[SimonSays] Voice: "' +
+              ptVoice.name +
+              '" (' +
+              ptVoice.lang +
+              ") score=" +
+              candidates[0].score,
+          );
+        } else {
+          ptVoice = null;
+          console.warn("[SimonSays] No Portuguese voice found");
+        }
+      }
+      if (window.speechSynthesis) {
+        findPtVoice();
+        speechSynthesis.onvoiceschanged = findPtVoice;
+        setTimeout(findPtVoice, 200);
+        setTimeout(findPtVoice, 1000);
+      }
+
+      function say(text, cb, isSimon, cmdId) {
+        lastSpeak = text;
+        var wiz = document.getElementById("wizard");
+        wiz.classList.add("talk");
+
+        var finished = false;
+        function done() {
+          if (finished) return;
+          finished = true;
+          wiz.classList.remove("talk");
+          if (cb) cb();
+        }
+        // Safety timeout
+        setTimeout(done, 6000);
+
+        // Use pre-recorded MP3 files
+        if (cmdId) {
+          try {
+            if (isSimon) {
+              // Play "Simão diz" then the command
+              var prefix = new Audio("audio/simao_diz.mp3");
+              prefix.onended = function () {
+                var cmd = new Audio("audio/" + cmdId + ".mp3");
+                cmd.onended = done;
+                cmd.onerror = done;
+                cmd.play().catch(function () {
+                  done();
+                });
+              };
+              prefix.onerror = function () {
+                // If prefix fails, try just the command
+                var cmd = new Audio("audio/" + cmdId + ".mp3");
+                cmd.onended = done;
+                cmd.onerror = done;
+                cmd.play().catch(function () {
+                  done();
+                });
+              };
+              prefix.play().catch(function () {
+                fallbackSpeak(text, done);
+              });
+            } else {
+              // Just the command (trick round, no "Simão diz")
+              var cmd = new Audio("audio/" + cmdId + ".mp3");
+              cmd.onended = done;
+              cmd.onerror = function () {
+                fallbackSpeak(text, done);
+              };
+              cmd.play().catch(function () {
+                fallbackSpeak(text, done);
+              });
+            }
+            return;
+          } catch (e) {
+            console.warn("MP3 playback error:", e);
+          }
+        }
+
+        // Fallback: Web Speech API
+        fallbackSpeak(text, done);
+      }
+
+      function fallbackSpeak(text, done) {
+        if (!window.speechSynthesis) {
+          setTimeout(done, 1500);
+          return;
+        }
+        if (!voicesReady) findPtVoice();
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "pt-PT";
+        u.rate = 0.88;
+        u.pitch = 1.05;
+        u.volume = 1;
+        if (ptVoice) u.voice = ptVoice;
+        u.onend = done;
+        u.onerror = function () {
+          done();
+        };
+        speechSynthesis.speak(u);
+      }
+
+      function replay() {
+        if (!curCmd) return;
+        var btn = document.getElementById("replay-btn");
+        btn.classList.add("on");
+        say(
+          lastSpeak,
+          function () {
+            btn.classList.remove("on");
+          },
+          simonSays,
+          curCmd.id,
+        );
+      }
+
+      // ======= SOUNDS =======
+      function snd(type) {
+        try {
+          var c = new AudioContext();
+          c.resume();
+          var o = c.createOscillator(),
+            g = c.createGain();
+          o.connect(g);
+          g.connect(c.destination);
+          if (type === "ok") {
+            o.type = "sine";
+            o.frequency.setValueAtTime(523, c.currentTime);
+            o.frequency.setValueAtTime(659, c.currentTime + 0.08);
+            o.frequency.setValueAtTime(784, c.currentTime + 0.16);
+            g.gain.setValueAtTime(0.25, c.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + 0.35);
+            o.start();
+            o.stop(c.currentTime + 0.35);
+          } else if (type === "bad") {
+            o.type = "sawtooth";
+            o.frequency.setValueAtTime(300, c.currentTime);
+            o.frequency.linearRampToValueAtTime(150, c.currentTime + 0.25);
+            g.gain.setValueAtTime(0.18, c.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + 0.35);
+            o.start();
+            o.stop(c.currentTime + 0.35);
+          } else if (type === "combo") {
+            o.type = "sine";
+            [784, 988, 1175, 1318].forEach(function (f, i) {
+              o.frequency.setValueAtTime(f, c.currentTime + i * 0.07);
+            });
+            g.gain.setValueAtTime(0.22, c.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + 0.45);
+            o.start();
+            o.stop(c.currentTime + 0.45);
+          } else if (type === "win") {
+            [523, 659, 784, 1047].forEach(function (f, i) {
+              var o2 = c.createOscillator(),
+                g2 = c.createGain();
+              o2.type = "sine";
+              o2.connect(g2);
+              g2.connect(c.destination);
+              o2.frequency.value = f;
+              g2.gain.setValueAtTime(0.18, c.currentTime + i * 0.12);
+              g2.gain.exponentialRampToValueAtTime(
+                0.01,
+                c.currentTime + i * 0.12 + 0.35,
+              );
+              o2.start(c.currentTime + i * 0.12);
+              o2.stop(c.currentTime + i * 0.12 + 0.35);
+            });
+            return;
+          } else if (type === "lose") {
+            o.type = "triangle";
+            o.frequency.setValueAtTime(440, c.currentTime);
+            o.frequency.linearRampToValueAtTime(165, c.currentTime + 0.5);
+            g.gain.setValueAtTime(0.25, c.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + 0.6);
+            o.start();
+            o.stop(c.currentTime + 0.6);
+          }
+        } catch (e) {}
+      }
+
+      // ======= TOAST =======
+      function toast(txt, cls) {
+        var t = document.getElementById("toast");
+        t.className = "toast " + cls;
+        t.textContent = txt;
+        requestAnimationFrame(function () {
+          t.classList.add("show");
+        });
+        setTimeout(function () {
+          t.classList.remove("show");
+        }, 1600);
+      }
+
+      // ======= CONFETTI =======
+      function confetti(n) {
+        var cols = [
+          "#A78BFA",
+          "#EC4899",
+          "#F59E0B",
+          "#10B981",
+          "#3B82F6",
+          "#EF4444",
+        ];
+        for (var i = 0; i < n; i++) {
+          var d = document.createElement("div");
+          d.className = "confetti";
+          d.style.left = Math.random() * 100 + "%";
+          d.style.width = d.style.height = 5 + Math.random() * 8 + "px";
+          d.style.background = cols[Math.floor(Math.random() * cols.length)];
+          d.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+          d.style.animationDuration = 1.5 + Math.random() * 2 + "s";
+          d.style.animationDelay = Math.random() * 0.4 + "s";
+          document.body.appendChild(d);
+          setTimeout(function () {
+            d.remove();
+          }, 4000);
+        }
+      }
+
+      // ======= COMBO =======
+      function updCombo() {
+        var el = document.getElementById("combo");
+        if (streak >= 2) {
+          el.classList.add("on");
+          document.getElementById("combo-num").textContent = streak + "x";
+        } else {
+          el.classList.remove("on");
+        }
+      }
+
+      // ======= HUD =======
+      function updHUD() {
+        document.getElementById("score").textContent = pts;
+        document.getElementById("round").textContent = rnd + "/" + TOTAL;
+        var hearts = document.querySelectorAll(".heart");
+        hearts.forEach(function (h, i) {
+          h.classList.toggle("dead", i >= lives);
+        });
+      }
+
+      function updRoad() {
+        var pct = Math.min((correct / TOTAL) * 100, 100);
+        var fill = document.getElementById("road-fill");
+        var car = document.getElementById("road-car");
+        if (fill) fill.style.width = pct + "%";
+        if (car) car.style.left = "calc(" + pct + "% - 12px)";
+      }
+
+      // ======= START =======
+      var speechWarmedUp = false;
+      function startGame() {
+        // Warm up speech synthesis on first user click (required by Chrome)
+        if (!speechWarmedUp && window.speechSynthesis) {
+          speechWarmedUp = true;
+          speechSynthesis.cancel();
+          var warmup = new SpeechSynthesisUtterance("");
+          warmup.volume = 0;
+          speechSynthesis.speak(warmup);
+        }
+        pts = 0;
+        lives = 3;
+        rnd = 0;
+        streak = 0;
+        best = 0;
+        correct = 0;
+        words = new Set();
+        updHUD();
+        updCombo();
+        updRoad();
+        go("game");
+        nextRound();
+      }
+      function goHome() {
+        go("welcome");
+      }
+
+      // ======= NEXT ROUND =======
+      function nextRound() {
+        if (rnd >= TOTAL || lives <= 0) {
+          endGame();
+          return;
+        }
+        rnd++;
+        locked = false;
+        updHUD();
+
+        curCmd = CMDS[Math.floor(Math.random() * CMDS.length)];
+        words.add(curCmd.pt + " (" + curCmd.en + ")");
+
+        // 70% "Simão diz", 30% trick
+        simonSays = Math.random() < 0.7;
+
+        var spoken = simonSays ? "Simão diz: " + curCmd.pt : curCmd.pt;
+
+        // Update bubble
+        var bub = document.getElementById("bubble");
+        bub.classList.toggle("trick", !simonSays);
+        document.getElementById("b-prefix").textContent = simonSays
+          ? "Simão diz:"
+          : "";
+        document.getElementById("b-cmd").textContent =
+          curCmd.emoji + " " + curCmd.pt;
+        document.getElementById("b-en").textContent = "";
+
+        say(spoken, null, simonSays, curCmd.id);
+        buildBtns();
+      }
+
+      // ======= BUILD BUTTONS =======
+
+      // SVG stick figure illustrations for each action
+      function makeSVG(id) {
+        // Base stick figure parts
+        var head = '<circle cx="50" cy="22" r="12" class="sf-head"/>';
+        var eyeL = '<circle cx="46" cy="20" r="1.5" class="sf-eye"/>';
+        var eyeR = '<circle cx="54" cy="20" r="1.5" class="sf-eye"/>';
+        var smile = '<path d="M45 26 Q50 31 55 26" class="sf-mouth"/>';
+        var body = '<line x1="50" y1="34" x2="50" y2="65" class="sf-body"/>';
+
+        var svgs = {
+          jump:
+            '<g style="animation:sfJump 0.6s ease infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="30" y2="38" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="38" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="38" y2="85" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="62" y2="85" class="sf-arm"/>' +
+            '<line x1="38" y1="85" x2="45" y2="92" class="sf-leg" style="animation:sfStomp .3s ease infinite"/>' +
+            "</g>",
+          clap:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<g style="transform-origin:50px 45px;animation:sfClap 0.4s ease infinite"><line x1="50" y1="45" x2="30" y2="40" class="sf-arm"/></g>' +
+            '<g style="transform-origin:50px 45px;animation:sfClapR 0.4s ease infinite"><line x1="50" y1="45" x2="70" y2="40" class="sf-arm"/></g>' +
+            '<text x="50" y="32" text-anchor="middle" style="font-size:8px;animation:sfPulse 0.4s ease infinite" fill="#FF6B6B">👏</text>',
+          dance:
+            '<g style="transform-origin:50px 50px;animation:sfDance 0.6s ease-in-out infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="28" y2="35" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="35" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="65" y2="90" class="sf-leg"/>' +
+            '<text x="75" y="30" style="font-size:10px">🎵</text>' +
+            "</g>",
+          sit:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            '<line x1="50" y1="34" x2="50" y2="55" class="sf-body"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="55" x2="70" y2="55" class="sf-leg"/>' +
+            '<line x1="70" y1="55" x2="70" y2="80" class="sf-leg"/>' +
+            '<line x1="50" y1="55" x2="30" y2="55" class="sf-leg"/>' +
+            '<line x1="30" y1="55" x2="30" y2="80" class="sf-leg"/>' +
+            '<rect x="20" y="50" width="60" height="5" rx="2" fill="#8B5E3C" opacity="0.5"/>',
+          spin:
+            '<g style="transform-origin:50px 50px;animation:sfSpin 1s linear infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="28" y2="50" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="50" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            "</g>" +
+            '<circle cx="50" cy="50" r="30" fill="none" stroke="#4FC3F7" stroke-width="1" stroke-dasharray="5 5" opacity="0.4"/>',
+          wave:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="transform-origin:70px 30px;animation:sfWave 0.4s ease-in-out infinite alternate">' +
+            '<line x1="50" y1="45" x2="72" y2="28" class="sf-arm"/>' +
+            '<circle cx="75" cy="22" r="5" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            "</g>",
+          laugh:
+            '<g style="animation:sfShake 0.2s ease infinite">' +
+            '<circle cx="50" cy="22" r="12" class="sf-head"/>' +
+            eyeL +
+            eyeR +
+            '<path d="M42 26 Q50 35 58 26" class="sf-mouth" stroke-width="2.5"/>' +
+            body +
+            '<line x1="50" y1="45" x2="32" y2="50" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="68" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<text x="72" y="18" style="font-size:8px">😂</text>' +
+            "</g>",
+          sing:
+            head +
+            eyeL +
+            eyeR +
+            '<ellipse cx="50" cy="27" rx="4" ry="5" fill="#333" opacity="0.6"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="35" class="sf-arm"/>' +
+            '<circle cx="76" cy="32" r="4" fill="#999"/><line x1="76" y1="36" x2="76" y2="50" stroke="#999" stroke-width="2"/>' +
+            '<text x="30" y="20" class="sf-note" style="animation:sfNoteFloat 1.5s ease infinite">♪</text>' +
+            '<text x="70" y="15" class="sf-note" style="animation:sfNoteFloat 1.5s ease 0.5s infinite">♫</text>',
+          whisper:
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M45 27 Q50 29 55 27" class="sf-mouth"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="transform-origin:64px 24px"><line x1="50" y1="45" x2="64" y2="24" class="sf-arm"/></g>' +
+            '<text x="66" y="18" fill="#999" style="font-size:9px;animation:sfPulse 1s ease infinite">🤫</text>',
+          nose:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfNod 0.8s ease infinite"><line x1="50" y1="45" x2="52" y2="27" class="sf-arm"/>' +
+            '<circle cx="50" cy="26" r="3" fill="#FF6B6B" opacity="0.6"/></g>',
+          eyes:
+            head +
+            '<line x1="43" y1="20" x2="48" y2="20" class="sf-body" stroke-width="2"/>' +
+            '<line x1="52" y1="20" x2="57" y2="20" class="sf-body" stroke-width="2"/>' +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<g style="animation:sfBob 0.8s ease infinite">' +
+            '<line x1="50" y1="45" x2="38" y2="20" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="62" y2="20" class="sf-arm"/>' +
+            '<circle cx="38" cy="18" r="4" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            '<circle cx="62" cy="18" r="4" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            "</g>",
+          hand:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBob 0.5s ease infinite">' +
+            '<line x1="50" y1="45" x2="70" y2="10" class="sf-arm"/>' +
+            '<circle cx="72" cy="6" r="5" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            "</g>",
+          stomp:
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M44 27 Q50 24 56 27" class="sf-mouth"/>' +
+            body +
+            '<line x1="50" y1="45" x2="30" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<g style="animation:sfStomp 0.3s ease infinite">' +
+            '<line x1="50" y1="65" x2="65" y2="85" class="sf-leg"/>' +
+            '<ellipse cx="68" cy="88" rx="8" ry="3" fill="#FF6B6B" opacity="0.4"/>' +
+            "</g>" +
+            '<text x="50" y="96" text-anchor="middle" fill="#FF6B6B" style="font-size:8px;animation:sfPulse 0.3s ease infinite">💥</text>',
+          fly:
+            '<g style="animation:sfFloat 1.5s ease-in-out infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="18" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="82" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="42" y2="88" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="58" y2="88" class="sf-leg"/>' +
+            "</g>" +
+            '<text x="15" y="55" style="font-size:7px;opacity:0.4">~</text>' +
+            '<text x="80" y="55" style="font-size:7px;opacity:0.4">~</text>',
+          run:
+            '<g style="animation:sfRun 0.3s ease infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="30" y2="40" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="30" y2="85" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="68" y2="88" class="sf-leg"/>' +
+            "</g>" +
+            '<text x="20" y="70" style="font-size:8px;opacity:0.3;animation:sfPulse 0.3s ease infinite">💨</text>',
+          stretch:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            '<line x1="50" y1="34" x2="50" y2="68" class="sf-body"/>' +
+            '<line x1="50" y1="68" x2="38" y2="92" class="sf-leg"/>' +
+            '<line x1="50" y1="68" x2="62" y2="92" class="sf-leg"/>' +
+            '<g style="animation:sfBob 1s ease-in-out infinite">' +
+            '<line x1="50" y1="45" x2="30" y2="12" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="12" class="sf-arm"/>' +
+            "</g>",
+          blow:
+            head +
+            eyeL +
+            eyeR +
+            '<ellipse cx="53" cy="27" rx="3" ry="2" fill="none" stroke="#333" stroke-width="1.5"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBlowAir 1.5s ease-out infinite">' +
+            '<ellipse cx="62" cy="26" rx="4" ry="3" fill="#4FC3F7" opacity="0.5"/>' +
+            "</g>" +
+            '<g style="animation:sfBlowAir 1.5s ease-out 0.5s infinite">' +
+            '<ellipse cx="65" cy="24" rx="3" ry="2" fill="#4FC3F7" opacity="0.3"/>' +
+            "</g>",
+          look:
+            head +
+            '<circle cx="45" cy="20" r="4" fill="#333"/>' +
+            '<circle cx="55" cy="20" r="4" fill="#333"/>' +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="35" class="sf-arm"/>' +
+            '<g style="animation:sfPulse 0.8s ease infinite">' +
+            '<circle cx="45" cy="20" r="5" fill="none" stroke="#4FC3F7" stroke-width="1" opacity="0.6"/>' +
+            '<circle cx="55" cy="20" r="5" fill="none" stroke="#4FC3F7" stroke-width="1" opacity="0.6"/>' +
+            "</g>" +
+            '<text x="75" y="32" style="font-size:10px;animation:sfPulse 1s ease infinite">👁️</text>',
+          listen:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBob 0.6s ease infinite">' +
+            '<line x1="50" y1="45" x2="65" y2="22" class="sf-arm"/>' +
+            '<ellipse cx="65" cy="20" rx="6" ry="8" fill="#FFD93D" stroke="#333" stroke-width="1" opacity="0.7"/>' +
+            "</g>" +
+            '<text x="72" y="18" style="font-size:8px;animation:sfPulse 1s ease 0.3s infinite">👂</text>',
+          eat:
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M44 27 Q50 32 56 27" class="sf-mouth" stroke-width="2"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBob 0.5s ease infinite">' +
+            '<line x1="50" y1="45" x2="58" y2="28" class="sf-arm"/>' +
+            '<rect x="55" y="22" width="10" height="2" rx="1" fill="#999"/>' +
+            "</g>" +
+            '<text x="66" y="22" style="font-size:8px;animation:sfPulse 0.8s ease infinite">🍽️</text>',
+          drink:
+            head +
+            eyeL +
+            eyeR +
+            '<ellipse cx="50" cy="27" rx="3" ry="2" fill="#333" opacity="0.5"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBob 0.6s ease infinite">' +
+            '<line x1="50" y1="45" x2="55" y2="24" class="sf-arm"/>' +
+            '<rect x="52" y="18" width="8" height="12" rx="2" fill="#4FC3F7" stroke="#333" stroke-width="1" opacity="0.7"/>' +
+            "</g>",
+          sleep:
+            '<g style="animation:sfBob 2s ease-in-out infinite">' +
+            head +
+            '<line x1="42" y1="20" x2="48" y2="20" class="sf-body" stroke-width="2"/>' +
+            '<line x1="52" y1="20" x2="58" y2="20" class="sf-body" stroke-width="2"/>' +
+            '<path d="M44 27 Q50 25 56 27" class="sf-mouth"/>' +
+            body +
+            "</g>" +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="55" class="sf-arm"/>' +
+            '<text x="65" y="12" style="font-size:10px;animation:sfNoteFloat 2s ease infinite">💤</text>' +
+            '<text x="72" y="8" style="font-size:7px;animation:sfNoteFloat 2s ease 0.7s infinite">💤</text>',
+          play:
+            '<g style="animation:sfShake 0.4s ease infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M42 26 Q50 35 58 26" class="sf-mouth" stroke-width="2.5"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="28" y2="35" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="35" class="sf-arm"/>' +
+            "</g>" +
+            '<text x="24" y="30" style="font-size:8px;animation:sfPulse 0.5s ease infinite">🎮</text>' +
+            '<text x="50" y="5" text-anchor="middle" style="font-size:8px;animation:sfPulse 0.8s ease 0.3s infinite">⭐</text>',
+          stand_up:
+            '<g style="animation:sfBob 0.8s ease infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="30" y2="35" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="35" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '</g>' +
+            '<text x="78" y="25" style="font-size:14px;animation:sfBob 0.6s ease infinite">⬆️</text>',
+          walk:
+            '<g style="animation:sfRun 0.6s ease infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="35" y2="40" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="65" y2="50" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="35" y2="88" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="88" class="sf-leg"/>' +
+            '</g>' +
+            '<text x="22" y="70" style="font-size:7px;opacity:0.3;animation:sfPulse 0.5s ease infinite">👣</text>',
+          stop:
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M44 27 L56 27" class="sf-mouth"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="25" y2="38" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="75" y2="38" class="sf-arm"/>' +
+            '<circle cx="25" cy="36" r="5" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            '<circle cx="75" cy="36" r="5" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            '<text x="50" y="5" text-anchor="middle" style="font-size:12px">🛑</text>',
+          shout:
+            '<g style="animation:sfShake 0.2s ease infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M42 26 Q50 36 58 26" class="sf-mouth" stroke-width="2.5"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="28" y2="38" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="38" class="sf-arm"/>' +
+            '</g>' +
+            '<g style="animation:sfPulse 0.5s ease infinite">' +
+            '<line x1="65" y1="22" x2="72" y2="20" stroke="#FF6B6B" stroke-width="2"/>' +
+            '<line x1="65" y1="26" x2="74" y2="26" stroke="#FF6B6B" stroke-width="2"/>' +
+            '<line x1="65" y1="30" x2="72" y2="32" stroke="#FF6B6B" stroke-width="2"/>' +
+            '</g>',
+          smile:
+            '<g style="animation:sfBob 1.5s ease-in-out infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M40 24 Q50 38 60 24" class="sf-mouth" stroke-width="2.5"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="55" class="sf-arm"/>' +
+            '</g>' +
+            '<text x="72" y="15" style="font-size:10px;animation:sfPulse 1s ease infinite">✨</text>',
+          hug:
+            '<g style="animation:sfBob 1s ease-in-out infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M42 26 Q50 33 58 26" class="sf-mouth" stroke-width="2"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<line x1="30" y1="55" x2="38" y2="65" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="55" class="sf-arm"/>' +
+            '<line x1="70" y1="55" x2="62" y2="65" class="sf-arm"/>' +
+            '</g>' +
+            '<text x="50" y="5" text-anchor="middle" style="font-size:10px;animation:sfPulse 1s ease infinite">🤗</text>',
+          kick:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="45" x2="30" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="70" y2="42" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<g style="animation:sfStomp 0.3s ease infinite">' +
+            '<line x1="50" y1="65" x2="75" y2="65" class="sf-leg"/>' +
+            '<line x1="75" y1="65" x2="85" y2="70" class="sf-leg"/>' +
+            '</g>' +
+            '<text x="85" y="62" style="font-size:8px;animation:sfPulse 0.3s ease infinite">💥</text>',
+          point:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBob 0.5s ease infinite">' +
+            '<line x1="50" y1="45" x2="70" y2="15" class="sf-arm"/>' +
+            '<circle cx="72" cy="10" r="3" fill="#FFD93D" stroke="#333" stroke-width="1"/>' +
+            '</g>' +
+            '<text x="78" y="10" style="font-size:8px;animation:sfPulse 0.8s ease infinite">👆</text>',
+          breathe:
+            '<g style="animation:sfBob 2s ease-in-out infinite">' +
+            head +
+            eyeL +
+            eyeR +
+            '<ellipse cx="50" cy="27" rx="3" ry="2" fill="none" stroke="#333" stroke-width="1.5"/>' +
+            body +
+            '<line x1="50" y1="45" x2="28" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="55" class="sf-arm"/>' +
+            '<line x1="50" y1="65" x2="35" y2="80" class="sf-leg"/>' +
+            '<line x1="35" y1="80" x2="42" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="65" y2="80" class="sf-leg"/>' +
+            '<line x1="65" y1="80" x2="58" y2="90" class="sf-leg"/>' +
+            '</g>' +
+            '<g style="animation:sfPulse 2s ease-in-out infinite">' +
+            '<text x="75" y="45" style="font-size:9px">☁️</text>' +
+            '</g>',
+          draw:
+            head +
+            eyeL +
+            eyeR +
+            smile +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="30" y2="55" class="sf-arm"/>' +
+            '<g style="animation:sfBob 0.6s ease infinite">' +
+            '<line x1="50" y1="45" x2="70" y2="60" class="sf-arm"/>' +
+            '<line x1="70" y1="60" x2="72" y2="65" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>' +
+            '</g>' +
+            '<path d="M72 70 Q75 75 80 72 Q82 78 76 80" fill="none" stroke="#4FC3F7" stroke-width="1.5" opacity="0.6"/>',
+          nothing:
+            head +
+            eyeL +
+            eyeR +
+            '<path d="M44 27 L56 27" class="sf-mouth"/>' +
+            body +
+            '<line x1="50" y1="65" x2="38" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="65" x2="62" y2="90" class="sf-leg"/>' +
+            '<line x1="50" y1="45" x2="28" y2="38" class="sf-arm"/>' +
+            '<line x1="50" y1="45" x2="72" y2="38" class="sf-arm"/>' +
+            '<text x="50" y="5" text-anchor="middle" style="font-size:8px">🤷</text>',
+        };
+
+        var svg = svgs[id] || svgs.nothing;
+        return (
+          '<div class="act-illust"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+          svg +
+          "</svg></div>"
+        );
+      }
+
+      function buildBtns() {
+        var area = document.getElementById("actions");
+        area.innerHTML = "";
+
+        var opts = [curCmd];
+        var pool = CMDS.filter(function (c) {
+          return c.id !== curCmd.id;
+        });
+        shuffle(pool);
+        opts.push(pool[0], pool[1]);
+        shuffle(opts);
+
+        opts.forEach(function (cmd) {
+          var b = document.createElement("button");
+          b.className = "act " + cmd.c;
+          b.innerHTML =
+            makeSVG(cmd.id) + '<span class="act-label">' + cmd.en + "</span>";
+          b.onclick = function () {
+            answer(cmd.id);
+          };
+          area.appendChild(b);
+        });
+
+        var nb = document.createElement("button");
+        nb.className = "act c-red";
+        nb.innerHTML =
+          makeSVG("nothing") + '<span class="act-label">Do nothing!</span>';
+        nb.onclick = function () {
+          answer("nothing");
+        };
+        area.appendChild(nb);
+      }
+
+      // ======= ANSWER =======
+      function answer(id) {
+        if (locked) return;
+        locked = true;
+
+        var ok = false;
+        if (simonSays) {
+          ok = id === curCmd.id;
+        } else {
+          ok = id === "nothing";
+        }
+
+        var btns = document.querySelectorAll(".act");
+
+        if (ok) {
+          correct++;
+          streak++;
+          if (streak > best) best = streak;
+          var bonus = 100 + (streak > 1 ? streak * 25 : 0);
+          pts += bonus;
+
+          // Flash correct button
+          btns.forEach(function (b) {
+            var lbl = b.querySelector(".act-label");
+            if (lbl) {
+              if (
+                (simonSays && lbl.textContent === curCmd.en) ||
+                (!simonSays && lbl.textContent === "Do nothing!")
+              )
+                b.classList.add("correct-pop");
+            }
+          });
+
+          try {
+            snd(streak >= 3 ? "combo" : "ok");
+          } catch (e) {}
+          if (!simonSays) {
+            toast("🎯 Trick dodged! +" + bonus, "trick");
+          } else {
+            toast("✅ Correct! +" + bonus, "ok");
+          }
+          if (streak >= 3) confetti(10);
+          updRoad();
+        } else {
+          lives--;
+          streak = 0;
+
+          // Show correct answer
+          btns.forEach(function (b) {
+            var lbl = b.querySelector(".act-label");
+            if (lbl) {
+              if (
+                (simonSays && lbl.textContent === curCmd.en) ||
+                (!simonSays && lbl.textContent === "Do nothing!")
+              )
+                b.classList.add("correct-pop");
+            }
+          });
+
+          // Flash wrong
+          btns.forEach(function (b) {
+            var lbl = b.querySelector(".act-label");
+            if (lbl) {
+              if (
+                (id === "nothing" && lbl.textContent === "Do nothing!") ||
+                CMDS.some(function (c) {
+                  return c.id === id && c.en === lbl.textContent;
+                })
+              )
+                b.classList.add("wrong-pop");
+            }
+          });
+
+          try {
+            snd("bad");
+          } catch (e) {}
+          if (!simonSays) {
+            toast("😬 Simon didn't say!", "bad");
+          } else {
+            toast("❌ Wrong action!", "bad");
+          }
+        }
+
+        updCombo();
+        updHUD();
+        btns.forEach(function (b) {
+          b.style.pointerEvents = "none";
+        });
+        setTimeout(nextRound, 1800);
+      }
+
+      // ======= END =======
+      function endGame() {
+        go("results");
+        var emoji, title, sub, stars;
+        if (lives <= 0) {
+          emoji = "💀";
+          title = "Game Over!";
+          sub = "Try again — you can do it!";
+          stars = correct >= 10 ? 2 : correct >= 5 ? 1 : 0;
+          try {
+            snd("lose");
+          } catch (e) {}
+        } else {
+          var pct = correct / TOTAL;
+          if (pct >= 0.9) {
+            emoji = "🏆";
+            title = "Incredible!";
+            sub = "Simon is impressed!";
+            stars = 5;
+          } else if (pct >= 0.7) {
+            emoji = "🎉";
+            title = "Great job!";
+            sub = "Almost perfect!";
+            stars = 4;
+          } else if (pct >= 0.5) {
+            emoji = "👏";
+            title = "Good work!";
+            sub = "Keep practicing!";
+            stars = 3;
+          } else {
+            emoji = "💪";
+            title = "Nice try!";
+            sub = "Practice makes perfect!";
+            stars = 2;
+          }
+          try {
+            snd("win");
+          } catch (e) {}
+          confetti(40);
+        }
+
+        document.getElementById("r-emoji").textContent = emoji;
+        document.getElementById("r-title").textContent = title;
+        document.getElementById("r-sub").textContent = sub;
+        document.getElementById("r-stars").textContent =
+          "⭐".repeat(stars) + "☆".repeat(5 - stars);
+        document.getElementById("r-score").textContent = pts;
+        document.getElementById("r-correct").textContent =
+          correct + "/" + TOTAL;
+        document.getElementById("r-streak").textContent = best + "x";
+
+        var wl = document.getElementById("words-list");
+        wl.innerHTML = "";
+        words.forEach(function (w) {
+          var s = document.createElement("span");
+          s.className = "word-tag";
+          s.textContent = w;
+          wl.appendChild(s);
+        });
+
+        // Save progress to cloud if connected
+        if (window.GameFirebase && window.GameFirebase.ready) {
+          window.GameFirebase.loadProgress(function (prev) {
+            var bestScore = Math.max(pts, (prev && prev.bestScore) || 0);
+            window.GameFirebase.saveProgress({
+              lastScore: pts,
+              lastCorrect: correct,
+              lastTotal: TOTAL,
+              bestScore: bestScore,
+              stars: stars,
+              wordsLearned: Array.from(words),
+              lastPlayed: new Date().toISOString(),
+            });
+          });
+        }
+      }
+
+      // Load cloud progress on startup
+      window.addEventListener("gameFirebaseReady", function () {
+        window.GameFirebase.loadProgress(function (data) {
+          if (data && data.bestScore) {
+            window._bestCloudScore = data.bestScore;
+            console.log("Cloud best score loaded:", data.bestScore);
+          }
+        });
+      });
+
+      // ======= HELPERS =======
+      function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+    </script>
+  </body>
+</html>

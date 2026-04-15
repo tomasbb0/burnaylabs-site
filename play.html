@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>The Burnay Labs — My Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+        }
+
+        /* ===== LOGIN ===== */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .login-emoji { font-size: 64px; margin-bottom: 16px; }
+        .login-card h1 { font-size: 28px; font-weight: 800; color: #1f2937; margin-bottom: 4px; }
+        .login-card p { color: #6b7280; font-size: 16px; margin-bottom: 32px; }
+        .login-field {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 18px;
+            font-family: 'Nunito', sans-serif;
+            margin-bottom: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .login-field:focus { border-color: #818cf8; }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform 0.1s;
+        }
+        .login-btn:hover { transform: scale(1.02); }
+        .login-btn:active { transform: scale(0.98); }
+        .login-error {
+            margin-top: 14px;
+            padding: 10px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #ef4444;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        .login-error.show { display: block; }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard { display: none; min-height: 100vh; }
+        .dashboard.active { display: block; }
+
+        .dash-header {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .dash-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .dash-avatar {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #4f46e5;
+        }
+        .dash-name {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .dash-level {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+        }
+        .dash-logout {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+        }
+        .dash-logout:hover { background: rgba(255,255,255,0.3); }
+
+        .dash-welcome {
+            text-align: center;
+            padding: 32px 20px 16px;
+            color: white;
+        }
+        .dash-welcome h2 { font-size: 28px; font-weight: 800; }
+        .dash-welcome p { font-size: 16px; opacity: 0.8; margin-top: 4px; }
+
+        /* ===== GAME GRID ===== */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            padding: 0 24px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+        }
+        .game-card-top {
+            padding: 28px 20px 20px;
+            text-align: center;
+        }
+        .game-card-emoji { font-size: 52px; margin-bottom: 12px; }
+        .game-card-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        .game-card-plays {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        .game-card-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            color: white;
+            transition: filter 0.2s;
+        }
+        .game-card-btn:hover { filter: brightness(1.1); }
+        .game-card:nth-child(6n+1) .game-card-btn { background: #ef4444; }
+        .game-card:nth-child(6n+2) .game-card-btn { background: #f59e0b; }
+        .game-card:nth-child(6n+3) .game-card-btn { background: #10b981; }
+        .game-card:nth-child(6n+4) .game-card-btn { background: #3b82f6; }
+        .game-card:nth-child(6n+5) .game-card-btn { background: #8b5cf6; }
+        .game-card:nth-child(6n+6) .game-card-btn { background: #ec4899; }
+
+        .game-card-stars {
+            color: #f59e0b;
+            font-size: 15px;
+            margin-top: 6px;
+        }
+
+        .empty-games {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            padding: 60px 20px;
+            font-size: 18px;
+        }
+        .empty-games .big-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+
+        .loading {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            padding: 60px 20px;
+            font-size: 18px;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== FLOATING EMOJIS ===== */
+        .float-emoji {
+            position: fixed;
+            font-size: 30px;
+            opacity: 0.15;
+            pointer-events: none;
+            animation: floatUp 15s linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .login-card { padding: 32px 24px; }
+            .games-grid { grid-template-columns: 1fr; padding: 0 16px 32px; }
+            .dash-welcome h2 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-emoji">📚</div>
+            <h1>The Burnay Labs</h1>
+            <p>Enter your name and password to play!</p>
+            <form id="login-form">
+                <input type="text" id="username" class="login-field" placeholder="👤 Your name" required autocomplete="off">
+                <input type="password" id="password" class="login-field" placeholder="🔑 Password" required>
+                <button type="submit" class="login-btn">🎮 Let's Play!</button>
+            </form>
+            <div id="login-error" class="login-error"></div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="dashboard">
+        <header class="dash-header">
+            <div class="dash-header-left">
+                <div class="dash-avatar" id="avatar-letter">?</div>
+                <div>
+                    <div class="dash-name" id="student-name">Student</div>
+                    <div class="dash-level" id="student-level">Level A0</div>
+                </div>
+            </div>
+            <button class="dash-logout" id="logout-btn">Sair / Logout</button>
+        </header>
+
+        <div class="dash-welcome">
+            <h2 id="welcome-text">Olá!</h2>
+            <p>Choose a game to play 🎯</p>
+        </div>
+
+        <div id="games-container" class="games-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <br>Loading your games...
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating background emojis -->
+    <script>
+        var emojis = ['📚','✏️','🎮','⭐','🌟','🎯','🚀','🦖','🏠','🤖','🏰','🚗'];
+        for (var i = 0; i < 8; i++) {
+            var el = document.createElement('div');
+            el.className = 'float-emoji';
+            el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.animationDelay = Math.random() * 15 + 's';
+            el.style.fontSize = (20 + Math.random() * 20) + 'px';
+            document.body.appendChild(el);
+        }
+    </script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        var currentStudent = null; // { id, name, level }
+
+        // Game emoji map — guess emoji from game URL/title
+        var GAME_EMOJIS = {
+            'build-your-car': '🚗',
+            'build-your-castle': '🏰',
+            'build-your-dinosaur': '🦖',
+            'build-your-house': '🏠',
+            'build-your-robot': '🤖',
+            'build-your-rocket': '🚀',
+            'command-circus': '🎪',
+            'emotion-island': '🎭',
+            'magic-kitchen': '🧑‍🍳',
+            'ocean-explorer': '🌊',
+            'simon-says': '🎯',
+            'spelling-stars': '⭐'
+        };
+
+        function getGameEmoji(url, title) {
+            if (url) {
+                for (var key in GAME_EMOJIS) {
+                    if (url.indexOf(key) !== -1) return GAME_EMOJIS[key];
+                }
+            }
+            if (title) {
+                var t = title.toLowerCase();
+                if (t.indexOf('car') !== -1 || t.indexOf('carro') !== -1) return '🚗';
+                if (t.indexOf('castle') !== -1 || t.indexOf('castelo') !== -1) return '🏰';
+                if (t.indexOf('dinosaur') !== -1 || t.indexOf('dinossauro') !== -1) return '🦖';
+                if (t.indexOf('house') !== -1 || t.indexOf('casa') !== -1) return '🏠';
+                if (t.indexOf('robot') !== -1) return '🤖';
+                if (t.indexOf('rocket') !== -1 || t.indexOf('foguetão') !== -1) return '🚀';
+                if (t.indexOf('circus') !== -1 || t.indexOf('circo') !== -1) return '🎪';
+                if (t.indexOf('emotion') !== -1 || t.indexOf('emoção') !== -1) return '🎭';
+                if (t.indexOf('kitchen') !== -1 || t.indexOf('cozinha') !== -1) return '🧑‍🍳';
+                if (t.indexOf('ocean') !== -1 || t.indexOf('oceano') !== -1) return '🌊';
+                if (t.indexOf('simon') !== -1 || t.indexOf('simão') !== -1) return '🎯';
+                if (t.indexOf('spelling') !== -1 || t.indexOf('soletrar') !== -1) return '⭐';
+            }
+            return '🎮';
+        }
+
+        // LOGIN
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var username = document.getElementById('username').value.trim().toLowerCase();
+            var password = document.getElementById('password').value;
+            var errorDiv = document.getElementById('login-error');
+            errorDiv.classList.remove('show');
+
+            if (!db) {
+                errorDiv.textContent = 'Cannot connect to database. Try again later.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Query Firestore for student with matching username
+            db.collection('students').where('username', '==', username).get()
+                .then(function(snap) {
+                    if (snap.empty) {
+                        errorDiv.textContent = 'Student not found. Check your name!';
+                        errorDiv.classList.add('show');
+                        return;
+                    }
+                    var doc = snap.docs[0];
+                    var data = doc.data();
+                    if (data.password !== password) {
+                        errorDiv.textContent = 'Wrong password. Try again!';
+                        errorDiv.classList.add('show');
+                        return;
+                    }
+                    // Login success
+                    currentStudent = { id: doc.id, name: data.name, level: data.level || 'A0' };
+                    showDashboard();
+                })
+                .catch(function(err) {
+                    console.error('Login error:', err);
+                    errorDiv.textContent = 'Connection error. Please try again.';
+                    errorDiv.classList.add('show');
+                });
+        });
+
+        function showDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('avatar-letter').textContent = currentStudent.name.charAt(0).toUpperCase();
+            document.getElementById('student-name').textContent = currentStudent.name;
+            document.getElementById('student-level').textContent = 'Level ' + currentStudent.level;
+            document.getElementById('welcome-text').textContent = 'Olá, ' + currentStudent.name + '! 👋';
+            loadGames();
+        }
+
+        function loadGames() {
+            var container = document.getElementById('games-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading your games...</div>';
+
+            db.collection('students').doc(currentStudent.id).collection('games').get()
+                .then(function(snap) {
+                    if (snap.empty) {
+                        container.innerHTML = '<div class="empty-games"><span class="big-emoji">🎮</span>No games assigned yet!<br>Ask your teacher to add some games.</div>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    snap.forEach(function(doc) {
+                        var game = doc.data();
+                        if (!game.url) return; // skip games without URLs
+                        var emoji = getGameEmoji(game.url, game.title);
+
+                        // Build the game URL with student tracking params
+                        var gameUrl;
+                        try {
+                            gameUrl = new URL(game.url);
+                            gameUrl.searchParams.set('student', currentStudent.id);
+                            gameUrl.searchParams.set('game', doc.id);
+                        } catch(e) {
+                            gameUrl = game.url;
+                        }
+
+                        var playCount = game.playCount || 0;
+                        var starsHtml = '';
+                        if (game.progress && game.progress.stars !== undefined) {
+                            var s = game.progress.stars || 0;
+                            starsHtml = '<div class="game-card-stars">' + '⭐'.repeat(Math.min(s, 5)) + '☆'.repeat(Math.max(0, 5 - s)) + '</div>';
+                        }
+                        if (game.progress && game.progress.completed) {
+                            starsHtml += '<div style="color:#10b981;font-size:13px;font-weight:600;margin-top:2px">✅ Completed!</div>';
+                        }
+
+                        var card = document.createElement('a');
+                        card.className = 'game-card';
+                        card.href = gameUrl.toString ? gameUrl.toString() : gameUrl;
+                        card.target = '_blank';
+                        card.innerHTML =
+                            '<div class="game-card-top">' +
+                                '<div class="game-card-emoji">' + emoji + '</div>' +
+                                '<div class="game-card-title">' + (game.title || 'Game') + '</div>' +
+                                '<div class="game-card-plays">Played ' + playCount + ' time' + (playCount !== 1 ? 's' : '') + '</div>' +
+                                starsHtml +
+                            '</div>' +
+                            '<div class="game-card-btn">▶ Play!</div>';
+                        container.appendChild(card);
+                    });
+                })
+                .catch(function(err) {
+                    console.error('Load games error:', err);
+                    container.innerHTML = '<div class="empty-games"><span class="big-emoji">😕</span>Error loading games.<br>Please try again.</div>';
+                });
+        }
+
+        // LOGOUT
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            currentStudent = null;
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('login-error').classList.remove('show');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏰 Constrói o Teu Castelo! - Build Your Castle!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: linear-gradient(
+          180deg,
+          #1e40af 0%,
+          #60a5fa 30%,
+          #34d399 80%,
+          #065f46 100%
+        );
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .game-card {
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 4px;
+        color: #7c2d12;
+      }
+      h2 {
+        font-size: 1.1rem;
+        text-align: center;
+        color: #9a3412;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      .castle-display {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 4px;
+        margin: 20px auto;
+        padding: 24px;
+        background: linear-gradient(180deg, #dbeafe, #bfdbfe);
+        border-radius: 16px;
+        max-width: 320px;
+      }
+      .castle-part {
+        width: 90px;
+        height: 70px;
+        background: #d1d5db;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        margin: 0 auto;
+      }
+      .castle-part.unlocked {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+        animation: castleUnlock 0.6s ease;
+      }
+      .castle-part.locked {
+        opacity: 0.25;
+        filter: grayscale(1);
+      }
+      @keyframes castleUnlock {
+        0% {
+          transform: scale(0.5) rotate(-10deg);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.15) rotate(3deg);
+        }
+        100% {
+          transform: scale(1.05) rotate(0);
+        }
+      }
+      .flag-part {
+        grid-column: 2;
+      }
+      .tower-left {
+        grid-column: 1;
+      }
+      .tower-right {
+        grid-column: 3;
+      }
+      .wall-center {
+        grid-column: 2;
+      }
+      .question-box {
+        background: #fef3c7;
+        border-radius: 16px;
+        padding: 24px;
+        margin: 20px 0;
+        text-align: center;
+        border: 3px solid #fbbf24;
+      }
+      .question-emoji {
+        font-size: 4rem;
+        margin-bottom: 12px;
+      }
+      .question-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 6px;
+      }
+      .question-hint {
+        font-size: 1rem;
+        color: #92400e;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .answer-btn {
+        padding: 18px;
+        font-size: 1.15rem;
+        font-weight: 700;
+        border: 3px solid #e5e7eb;
+        border-radius: 16px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+      }
+      .answer-btn:hover {
+        border-color: #f59e0b;
+        background: #fef3c7;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      }
+      .answer-btn.correct {
+        background: #d1fae5;
+        border-color: #10b981;
+        animation: correctPop 0.4s ease;
+      }
+      .answer-btn.wrong {
+        background: #fee2e2;
+        border-color: #ef4444;
+        animation: wrongShake 0.4s ease;
+      }
+      @keyframes correctPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .stars {
+        font-size: 1.4rem;
+      }
+      .level-badge {
+        background: linear-gradient(135deg, #b45309, #f59e0b);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 800;
+      }
+      .score-display {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        margin-bottom: 12px;
+      }
+      .celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .celebration-content {
+        background: linear-gradient(135deg, #b45309 0%, #fbbf24 100%);
+        border-radius: 24px;
+        padding: 48px;
+        text-align: center;
+        max-width: 500px;
+        color: white;
+        animation: celebPop 0.5s ease;
+      }
+      @keyframes celebPop {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .celebration h2 {
+        font-size: 2rem;
+        margin: 16px 0;
+        color: white;
+      }
+      .celebration .emoji {
+        font-size: 5rem;
+      }
+      .play-btn {
+        background: white;
+        color: #b45309;
+        border: none;
+        padding: 16px 48px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 16px;
+      }
+      .play-btn:hover {
+        transform: scale(1.05);
+      }
+      .hidden {
+        display: none !important;
+      }
+      .confetti {
+        position: fixed;
+        top: -10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        z-index: 150;
+        animation: confettiFall linear forwards;
+        pointer-events: none;
+      }
+      @keyframes confettiFall {
+        to {
+          top: 110vh;
+          transform: rotate(720deg);
+        }
+      }
+      .success-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .success-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .failure-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #ef4444, #f97316);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .failure-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-card">
+        <h1>🏰 Constrói o Teu Castelo!</h1>
+        <h2>Build Your Castle! — Learn objects & furniture</h2>
+
+        <div class="progress">
+          <span class="stars" id="stars">⭐⭐⭐⭐⭐</span>
+          <span class="level-badge" id="level">Nível 1</span>
+        </div>
+        <div class="score-display">Peças: <span id="parts">0</span>/6</div>
+
+        <div class="castle-display">
+          <div class="castle-part locked tower-left" id="part-0">🏴</div>
+          <div class="castle-part locked flag-part" id="part-1">👑</div>
+          <div class="castle-part locked tower-right" id="part-2">🏴</div>
+          <div class="castle-part locked tower-left" id="part-3">🗼</div>
+          <div class="castle-part locked wall-center" id="part-4">🚪</div>
+          <div class="castle-part locked tower-right" id="part-5">🗼</div>
+        </div>
+
+        <div class="question-box">
+          <div class="question-emoji" id="emoji">📖</div>
+          <div class="question-text" id="question">Loading...</div>
+          <div class="question-hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+      </div>
+    </div>
+
+    <div class="celebration hidden" id="celebration">
+      <div class="celebration-content">
+        <div class="emoji">🏰👑🎉</div>
+        <h2>O Castelo está pronto!</h2>
+        <p>Your castle is complete! You are the king/queen!</p>
+        <button class="play-btn" onclick="location.reload()">
+          🏰 Jogar Novamente / Play Again
+        </button>
+      </div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      const levels = [
+        {
+          theme: "Na Sala / Living Room",
+          questions: [
+            {
+              emoji: "🪑",
+              q: "O que é isto?",
+              hint: "What is this? (you sit on it)",
+              answer: "Cadeira",
+              options: ["Mesa", "Cadeira", "Sofá", "Cama"],
+            },
+            {
+              emoji: "🛋️",
+              q: "O que é isto?",
+              hint: "What is this? (comfortable to sit)",
+              answer: "Sofá",
+              options: ["Cadeira", "Sofá", "Tapete", "Almofada"],
+            },
+            {
+              emoji: "📺",
+              q: "O que é isto?",
+              hint: "What is this? (you watch it)",
+              answer: "Televisão",
+              options: ["Rádio", "Computador", "Televisão", "Telefone"],
+            },
+          ],
+        },
+        {
+          theme: "Na Cozinha / Kitchen",
+          questions: [
+            {
+              emoji: "🍽️",
+              q: "Onde comemos?",
+              hint: "Where do we eat?",
+              answer: "Mesa",
+              options: ["Mesa", "Cadeira", "Chão", "Sofá"],
+            },
+            {
+              emoji: "🥄",
+              q: "O que é isto?",
+              hint: "What is this? (you eat with it)",
+              answer: "Colher",
+              options: ["Faca", "Garfo", "Colher", "Prato"],
+            },
+            {
+              emoji: "🍵",
+              q: "O que é isto?",
+              hint: "What is this? (you drink from it)",
+              answer: "Copo",
+              options: ["Prato", "Copo", "Garrafa", "Taça"],
+            },
+          ],
+        },
+        {
+          theme: "No Quarto / Bedroom",
+          questions: [
+            {
+              emoji: "🛏️",
+              q: "Onde dormimos?",
+              hint: "Where do we sleep?",
+              answer: "Cama",
+              options: ["Sofá", "Cadeira", "Cama", "Chão"],
+            },
+            {
+              emoji: "💡",
+              q: "O que dá luz?",
+              hint: "What gives light?",
+              answer: "Lâmpada",
+              options: ["Janela", "Lâmpada", "Vela", "Sol"],
+            },
+            {
+              emoji: "🪟",
+              q: "O que é isto?",
+              hint: "What is this? (you look through it)",
+              answer: "Janela",
+              options: ["Porta", "Janela", "Espelho", "Parede"],
+            },
+          ],
+        },
+        {
+          theme: "Objetos da Escola / School Objects",
+          questions: [
+            {
+              emoji: "📖",
+              q: "O que é isto?",
+              hint: "What is this? (you read it)",
+              answer: "Livro",
+              options: ["Caderno", "Livro", "Jornal", "Carta"],
+            },
+            {
+              emoji: "✏️",
+              q: "O que é isto?",
+              hint: "What is this? (you write with it)",
+              answer: "Lápis",
+              options: ["Caneta", "Lápis", "Pincel", "Giz"],
+            },
+            {
+              emoji: "🎒",
+              q: "O que é isto?",
+              hint: "What is this? (carries your things)",
+              answer: "Mochila",
+              options: ["Saco", "Mochila", "Caixa", "Bolsa"],
+            },
+          ],
+        },
+        {
+          theme: "Objetos do Dia a Dia / Everyday Objects",
+          questions: [
+            {
+              emoji: "⚽",
+              q: "O que é isto?",
+              hint: "What is this? (you play with it)",
+              answer: "Bola",
+              options: ["Roda", "Bola", "Balão", "Ovo"],
+            },
+            {
+              emoji: "📱",
+              q: "O que é isto?",
+              hint: "What is this? (you call people)",
+              answer: "Telefone",
+              options: ["Televisão", "Rádio", "Telefone", "Relógio"],
+            },
+            {
+              emoji: "⌚",
+              q: "O que é isto?",
+              hint: "What is this? (tells the time)",
+              answer: "Relógio",
+              options: ["Anel", "Pulseira", "Relógio", "Bússola"],
+            },
+          ],
+        },
+        {
+          theme: "O Castelo / The Castle",
+          questions: [
+            {
+              emoji: "🚪",
+              q: "Por onde entramos?",
+              hint: "How do we enter?",
+              answer: "Porta",
+              options: ["Janela", "Porta", "Telhado", "Parede"],
+            },
+            {
+              emoji: "🔑",
+              q: "O que abre a porta?",
+              hint: "What opens the door?",
+              answer: "Chave",
+              options: ["Chave", "Mão", "Botão", "Cadeado"],
+            },
+            {
+              emoji: "👑",
+              q: "O que usa o rei?",
+              hint: "What does the king wear?",
+              answer: "Coroa",
+              options: ["Chapéu", "Coroa", "Capacete", "Gorro"],
+            },
+          ],
+        },
+      ];
+
+      let currentLevel = 0,
+        currentQ = 0,
+        stars = 5,
+        parts = 0;
+
+      function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+      }
+
+      function showQuestion() {
+        const level = levels[currentLevel];
+        const q = level.questions[currentQ];
+        document.getElementById("level").textContent =
+          "Nível " + (currentLevel + 1) + ": " + level.theme;
+        document.getElementById("emoji").textContent = q.emoji;
+        document.getElementById("question").textContent = q.q;
+        document.getElementById("hint").textContent = q.hint;
+
+        const answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        shuffle(q.options).forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "answer-btn";
+          btn.textContent = opt;
+          btn.disabled = false;
+          btn.onclick = () => checkAnswer(opt, q.answer, btn);
+          answersDiv.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected, correct, btn) {
+        const btns = document.querySelectorAll(".answer-btn");
+        btns.forEach((b) => (b.disabled = true));
+
+        if (selected === correct) {
+          btn.classList.add("correct");
+          setTimeout(() => nextQuestion(), 800);
+          try {
+            playCheerSound();
+          } catch (e) {}
+          try {
+            showSuccessSplash("Muito bem! 👑");
+          } catch (e) {}
+        } else {
+          btn.classList.add("wrong");
+          setTimeout(() => nextQuestion(), 1500);
+          try {
+            playOhSound();
+          } catch (e) {}
+          stars = Math.max(0, stars - 1);
+          document.getElementById("stars").textContent =
+            "⭐".repeat(stars) + "☆".repeat(5 - stars);
+          btns.forEach((b) => {
+            if (b.textContent === correct) b.classList.add("correct");
+          });
+          try {
+            showFailureSplash("Tenta outra vez!");
+          } catch (e) {}
+        }
+      }
+
+      function nextQuestion() {
+        currentQ++;
+        if (currentQ >= levels[currentLevel].questions.length) {
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.remove("locked");
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.add("unlocked");
+          parts++;
+          document.getElementById("parts").textContent = parts;
+          try {
+            playPling();
+          } catch (e) {}
+          currentLevel++;
+          currentQ = 0;
+          if (currentLevel >= levels.length) {
+            // Save completion to cloud
+            if (window.GameFirebase && window.GameFirebase.ready) {
+              window.GameFirebase.saveProgress({ completed: true, stars: stars, parts: parts, levelsCompleted: currentLevel });
+            }
+            launchConfetti();
+            setTimeout(
+              () =>
+                document
+                  .getElementById("celebration")
+                  .classList.remove("hidden"),
+              500,
+            );
+            return;
+          }
+        }
+        showQuestion();
+      }
+
+      function launchConfetti() {
+        const colors = [
+          "#F59E0B",
+          "#B45309",
+          "#FBBF24",
+          "#D97706",
+          "#92400E",
+          "#FCD34D",
+        ];
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            const c = document.createElement("div");
+            c.className = "confetti";
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.background =
+              colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDuration = 2 + Math.random() * 3 + "s";
+            c.style.width = 6 + Math.random() * 8 + "px";
+            c.style.height = 6 + Math.random() * 8 + "px";
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 5000);
+          }, i * 50);
+        }
+      }
+      function getAudioContext() {
+        try {
+          return (
+            window._audioCtx ||
+            (window._audioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )())
+          );
+        } catch (e) {
+          return null;
+        }
+      }
+      function playCheerSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        [1046, 1319, 1568].forEach((f, i) => {
+          const o = ctx.createOscillator(),
+            g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(f, now + i * 0.05);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + i * 0.05);
+          o.stop(now + 0.55);
+        });
+      }
+      function playOhSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(350, now);
+        o.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.7);
+      }
+      function playPling() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "triangle";
+        o.frequency.setValueAtTime(1320, now);
+        o.frequency.exponentialRampToValueAtTime(660, now + 0.12);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.28);
+      }
+      function showSuccessSplash(text) {
+        const s = document.createElement("div");
+        s.className = "success-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 800);
+      }
+      function showFailureSplash(text) {
+        const s = document.createElement("div");
+        s.className = "failure-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 1200);
+      }
+
+      showQuestion();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎭 Ilha das Emoções! - Emotion Island!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: linear-gradient(
+          180deg,
+          #f472b6 0%,
+          #a855f7 30%,
+          #6366f1 60%,
+          #818cf8 100%
+        );
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+      .floating-emoji {
+        position: fixed;
+        font-size: 2rem;
+        opacity: 0.15;
+        animation: emojiFloat linear infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+      @keyframes emojiFloat {
+        0% {
+          transform: translateY(100vh) rotate(0);
+        }
+        100% {
+          transform: translateY(-20vh) rotate(360deg);
+        }
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+      .game-card {
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 4px;
+        background: linear-gradient(135deg, #ec4899, #8b5cf6);
+        :text;
+        -webkit-text-fill-color: transparent;
+      }
+      h2 {
+        font-size: 1.1rem;
+        text-align: center;
+        color: #7c3aed;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      .emotion-display {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin: 20px 0;
+        padding: 24px;
+        background: linear-gradient(135deg, #fce7f3, #ede9fe, #dbeafe);
+        border-radius: 16px;
+      }
+      .emotion-face {
+        width: 80px;
+        height: 80px;
+        background: #f3e8ff;
+        border: 3px solid #ddd6fe;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.8rem;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .emotion-face.unlocked {
+        background: white;
+        border-color: #a855f7;
+        transform: scale(1.1);
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+        animation: faceReveal 0.8s ease;
+      }
+      .emotion-face.locked {
+        opacity: 0.15;
+        filter: grayscale(1);
+      }
+      @keyframes faceReveal {
+        0% {
+          transform: scale(0) rotate(-180deg);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.2) rotate(10deg);
+        }
+        100% {
+          transform: scale(1.1) rotate(0);
+        }
+      }
+      .emotion-label {
+        font-size: 0.7rem;
+        text-align: center;
+        color: #7c3aed;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+      .face-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .mood-meter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .mood-label {
+        font-size: 0.85rem;
+        color: #7c3aed;
+        font-weight: 700;
+      }
+      .mood-bar {
+        flex: 1;
+        height: 14px;
+        background: #f3e8ff;
+        border-radius: 7px;
+        overflow: hidden;
+      }
+      .mood-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ec4899, #a855f7, #6366f1);
+        border-radius: 7px;
+        transition: width 0.5s ease;
+      }
+      .scenario-box {
+        background: linear-gradient(135deg, #fdf4ff, #faf5ff);
+        border-radius: 16px;
+        padding: 24px;
+        margin: 20px 0;
+        text-align: center;
+        border: 3px solid #e9d5ff;
+        position: relative;
+      }
+      .scenario-emoji {
+        font-size: 5rem;
+        margin-bottom: 12px;
+        animation: emotionPulse 2s ease-in-out infinite;
+      }
+      @keyframes emotionPulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+      }
+      .scenario-text {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #581c87;
+        margin-bottom: 8px;
+      }
+      .scenario-story {
+        font-size: 1rem;
+        color: #7c3aed;
+        font-style: italic;
+        margin-bottom: 4px;
+        padding: 8px;
+        background: rgba(168, 85, 247, 0.08);
+        border-radius: 8px;
+      }
+      .scenario-hint {
+        font-size: 0.9rem;
+        color: #9333ea;
+        margin-top: 6px;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .answer-btn {
+        padding: 18px;
+        font-size: 1.15rem;
+        font-weight: 700;
+        border: 3px solid #e9d5ff;
+        border-radius: 16px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+      }
+      .answer-btn:hover {
+        border-color: #a855f7;
+        background: #faf5ff;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(168, 85, 247, 0.2);
+      }
+      .answer-btn.correct {
+        background: #d1fae5;
+        border-color: #10b981;
+        animation: correctPop 0.4s ease;
+      }
+      .answer-btn.wrong {
+        background: #fee2e2;
+        border-color: #ef4444;
+        animation: wrongShake 0.4s ease;
+      }
+      @keyframes correctPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .stars {
+        font-size: 1.4rem;
+      }
+      .level-badge {
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 800;
+      }
+      .celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .celebration-content {
+        background: linear-gradient(
+          135deg,
+          #ec4899 0%,
+          #a855f7 50%,
+          #6366f1 100%
+        );
+        border-radius: 24px;
+        padding: 48px;
+        text-align: center;
+        max-width: 500px;
+        color: white;
+        animation: celebPop 0.5s ease;
+      }
+      @keyframes celebPop {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .celebration h2 {
+        font-size: 2rem;
+        margin: 16px 0;
+        color: white;
+      }
+      .celebration .emoji {
+        font-size: 5rem;
+      }
+      .play-btn {
+        background: white;
+        color: #a855f7;
+        border: none;
+        padding: 16px 48px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 16px;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .confetti {
+        position: fixed;
+        top: -20px;
+        z-index: 150;
+        pointer-events: none;
+        animation: confettiFall linear forwards;
+      }
+      @keyframes confettiFall {
+        to {
+          top: 110vh;
+          transform: rotate(720deg);
+        }
+      }
+      .success-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .success-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .failure-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #ef4444, #f97316);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .failure-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-card">
+        <h1>🎭 Ilha das Emoções!</h1>
+        <h2>Emotion Island! — Learn feelings in Portuguese</h2>
+
+        <div class="progress">
+          <span class="stars" id="stars">⭐⭐⭐⭐⭐</span>
+          <span class="level-badge" id="level">Chapter 1</span>
+        </div>
+
+        <div class="mood-meter">
+          <span class="mood-label">😢</span>
+          <div class="mood-bar">
+            <div class="mood-fill" id="mood" style="width: 0%"></div>
+          </div>
+          <span class="mood-label">😄</span>
+        </div>
+
+        <div class="emotion-display">
+          <div class="face-container">
+            <div class="emotion-face locked" id="part-0">😊</div>
+            <div class="emotion-label" id="label-0">???</div>
+          </div>
+          <div class="face-container">
+            <div class="emotion-face locked" id="part-1">😢</div>
+            <div class="emotion-label" id="label-1">???</div>
+          </div>
+          <div class="face-container">
+            <div class="emotion-face locked" id="part-2">😠</div>
+            <div class="emotion-label" id="label-2">???</div>
+          </div>
+          <div class="face-container">
+            <div class="emotion-face locked" id="part-3">😨</div>
+            <div class="emotion-label" id="label-3">???</div>
+          </div>
+          <div class="face-container">
+            <div class="emotion-face locked" id="part-4">😮</div>
+            <div class="emotion-label" id="label-4">???</div>
+          </div>
+          <div class="face-container">
+            <div class="emotion-face locked" id="part-5">🥰</div>
+            <div class="emotion-label" id="label-5">???</div>
+          </div>
+        </div>
+
+        <div class="scenario-box">
+          <div class="scenario-emoji" id="emoji">😊</div>
+          <div class="scenario-story" id="story"></div>
+          <div class="scenario-text" id="question">Loading...</div>
+          <div class="scenario-hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+      </div>
+    </div>
+
+    <div class="celebration hidden" id="celebration">
+      <div class="celebration-content">
+        <div class="emoji">🎭🌈🎉</div>
+        <h2>Mestre das Emoções!</h2>
+        <p>
+          You are the Master of Emotions!<br />Now you know all the feelings in
+          Portuguese!
+        </p>
+        <button class="play-btn" onclick="location.reload()">
+          🎭 Jogar Novamente / Play Again
+        </button>
+      </div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      // Floating background emojis
+      const bgEmojis = [
+        "😊",
+        "😢",
+        "😠",
+        "😨",
+        "😮",
+        "🥰",
+        "😄",
+        "😭",
+        "🤗",
+        "🥱",
+      ];
+      for (let i = 0; i < 10; i++) {
+        const e = document.createElement("div");
+        e.className = "floating-emoji";
+        e.textContent = bgEmojis[i % bgEmojis.length];
+        e.style.left = Math.random() * 100 + "vw";
+        e.style.animationDuration = 8 + Math.random() * 12 + "s";
+        e.style.animationDelay = Math.random() * 8 + "s";
+        document.body.appendChild(e);
+      }
+
+      const emotionLabels = [
+        "Contente",
+        "Triste",
+        "Zangado",
+        "Assustado",
+        "Surpreso",
+        "Amor",
+      ];
+
+      const levels = [
+        {
+          theme: "Contente / Happy 😊",
+          questions: [
+            {
+              emoji: "😊",
+              story: "O João ganhou um presente!",
+              q: "Como se sente o João?",
+              hint: "How does João feel? (he got a gift!)",
+              answer: "Contente",
+              options: ["Triste", "Contente", "Zangado", "Assustado"],
+            },
+            {
+              emoji: "😄",
+              story: "A Maria está a brincar com amigos!",
+              q: "A Maria está...",
+              hint: "Maria is playing with friends!",
+              answer: "Feliz",
+              options: ["Feliz", "Triste", "Cansada", "Com medo"],
+            },
+            {
+              emoji: "🎉",
+              story: "Hoje é o dia de aniversário!",
+              q: "Como te sentes no teu aniversário?",
+              hint: "How do you feel on your birthday?",
+              answer: "Contente",
+              options: ["Zangado", "Contente", "Assustado", "Triste"],
+            },
+          ],
+        },
+        {
+          theme: "Triste / Sad 😢",
+          questions: [
+            {
+              emoji: "😢",
+              story: "O cão do Pedro fugiu...",
+              q: "Como se sente o Pedro?",
+              hint: "Pedro's dog ran away...",
+              answer: "Triste",
+              options: ["Contente", "Triste", "Zangado", "Surpreso"],
+            },
+            {
+              emoji: "😿",
+              story: "Está a chover e não pode brincar lá fora.",
+              q: "A Ana está...",
+              hint: "It's raining and she can't play outside",
+              answer: "Triste",
+              options: ["Feliz", "Triste", "Com medo", "Zangada"],
+            },
+            {
+              emoji: "😭",
+              story: "O gelado caiu ao chão!",
+              q: "Como se sente?",
+              hint: "The ice cream fell on the floor!",
+              answer: "Triste",
+              options: ["Contente", "Triste", "Surpreso", "Zangado"],
+            },
+          ],
+        },
+        {
+          theme: "Zangado / Angry 😠",
+          questions: [
+            {
+              emoji: "😠",
+              story: "Alguém partiu o brinquedo favorito!",
+              q: "Como se sente?",
+              hint: "Someone broke the favorite toy!",
+              answer: "Zangado",
+              options: ["Contente", "Triste", "Zangado", "Assustado"],
+            },
+            {
+              emoji: "😤",
+              story: "O irmão tirou o lanche!",
+              q: "A Sara está...",
+              hint: "Her brother took her snack!",
+              answer: "Zangada",
+              options: ["Feliz", "Zangada", "Triste", "Surpresa"],
+            },
+            {
+              emoji: "💢",
+              story: "Não o deixam jogar!",
+              q: "Como se sente?",
+              hint: "They won't let him play!",
+              answer: "Zangado",
+              options: ["Contente", "Assustado", "Zangado", "Triste"],
+            },
+          ],
+        },
+        {
+          theme: "Assustado / Scared 😨",
+          questions: [
+            {
+              emoji: "😨",
+              story: "Está muito escuro no quarto!",
+              q: "Como se sente?",
+              hint: "It's very dark in the room!",
+              answer: "Assustado",
+              options: ["Contente", "Zangado", "Assustado", "Triste"],
+            },
+            {
+              emoji: "😱",
+              story: "Ouviu um barulho estranho!",
+              q: "A Mia está...",
+              hint: "She heard a strange noise!",
+              answer: "Assustada",
+              options: ["Feliz", "Assustada", "Zangada", "Triste"],
+            },
+            {
+              emoji: "🫣",
+              story: "Vai ao dentista pela primeira vez!",
+              q: "Como se sente?",
+              hint: "Going to the dentist for the first time!",
+              answer: "Com medo",
+              options: ["Contente", "Com medo", "Zangado", "Surpreso"],
+            },
+          ],
+        },
+        {
+          theme: "Surpreso / Surprised 😮",
+          questions: [
+            {
+              emoji: "😮",
+              story: "Há uma festa surpresa!",
+              q: "Como se sente?",
+              hint: "There's a surprise party!",
+              answer: "Surpreso",
+              options: ["Triste", "Surpreso", "Zangado", "Assustado"],
+            },
+            {
+              emoji: "🤯",
+              story: "O mágico fez o coelho desaparecer!",
+              q: "As crianças estão...",
+              hint: "The magician made the rabbit disappear!",
+              answer: "Surpresas",
+              options: ["Tristes", "Zangadas", "Surpresas", "Assustadas"],
+            },
+            {
+              emoji: "😲",
+              story: "Encontrou dinheiro no bolso!",
+              q: "Como se sente?",
+              hint: "Found money in the pocket!",
+              answer: "Surpreso",
+              options: ["Surpreso", "Triste", "Zangado", "Com medo"],
+            },
+          ],
+        },
+        {
+          theme: "Amor & Carinho / Love 🥰",
+          questions: [
+            {
+              emoji: "🥰",
+              story: "A avó dá um abraço grande!",
+              q: "Sentes-te...",
+              hint: "Grandma gives a big hug!",
+              answer: "Amado",
+              options: ["Zangado", "Triste", "Amado", "Assustado"],
+            },
+            {
+              emoji: "❤️",
+              story: 'O pai diz: "Gosto muito de ti!"',
+              q: "Isso faz-nos sentir...",
+              hint: 'Dad says: "I love you!"',
+              answer: "Feliz e amado",
+              options: ["Surpreso", "Feliz e amado", "Com medo", "Zangado"],
+            },
+            {
+              emoji: "🤗",
+              story: "O melhor amigo partilha os brinquedos!",
+              q: "Sentes-te...",
+              hint: "Best friend shares toys!",
+              answer: "Contente",
+              options: ["Triste", "Zangado", "Contente", "Assustado"],
+            },
+          ],
+        },
+      ];
+
+      let currentLevel = 0,
+        currentQ = 0,
+        stars = 5,
+        totalQ = 18,
+        answeredQ = 0;
+
+      function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+      }
+
+      function showQuestion() {
+        const level = levels[currentLevel];
+        const q = level.questions[currentQ];
+        document.getElementById("level").textContent =
+          "Chapter " + (currentLevel + 1) + ": " + level.theme;
+        document.getElementById("emoji").textContent = q.emoji;
+        document.getElementById("story").textContent = q.story;
+        document.getElementById("question").textContent = q.q;
+        document.getElementById("hint").textContent = q.hint;
+        document.getElementById("mood").style.width =
+          (answeredQ / totalQ) * 100 + "%";
+
+        const answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        shuffle(q.options).forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "answer-btn";
+          btn.textContent = opt;
+          btn.disabled = false;
+          btn.onclick = () => checkAnswer(opt, q.answer, btn);
+          answersDiv.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected, correct, btn) {
+        const btns = document.querySelectorAll(".answer-btn");
+        btns.forEach((b) => (b.disabled = true));
+        answeredQ++;
+
+        if (selected === correct) {
+          btn.classList.add("correct");
+          setTimeout(() => nextQuestion(), 900);
+          try {
+            playCheerSound();
+          } catch (e) {}
+          try {
+            showSuccessSplash("Muito bem! 🌟");
+          } catch (e) {}
+        } else {
+          btn.classList.add("wrong");
+          setTimeout(() => nextQuestion(), 1500);
+          try {
+            playOhSound();
+          } catch (e) {}
+          stars = Math.max(0, stars - 1);
+          document.getElementById("stars").textContent =
+            "⭐".repeat(stars) + "☆".repeat(5 - stars);
+          btns.forEach((b) => {
+            if (b.textContent === correct) b.classList.add("correct");
+          });
+          try {
+            showFailureSplash("Tenta outra vez! 💜");
+          } catch (e) {}
+        }
+      }
+
+      function nextQuestion() {
+        currentQ++;
+        if (currentQ >= levels[currentLevel].questions.length) {
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.remove("locked");
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.add("unlocked");
+          document.getElementById("label-" + currentLevel).textContent =
+            emotionLabels[currentLevel];
+          try {
+            playPling();
+          } catch (e) {}
+          currentLevel++;
+          currentQ = 0;
+          if (currentLevel >= levels.length) {
+            // Save completion to cloud
+            if (window.GameFirebase && window.GameFirebase.ready) {
+              window.GameFirebase.saveProgress({
+                completed: true,
+                stars: stars,
+                levelsCompleted: currentLevel,
+              });
+            }
+            launchEmojis();
+            setTimeout(
+              () =>
+                document
+                  .getElementById("celebration")
+                  .classList.remove("hidden"),
+              500,
+            );
+            return;
+          }
+        }
+        showQuestion();
+      }
+
+      function launchEmojis() {
+        const emojis = [
+          "😊",
+          "😢",
+          "😠",
+          "😨",
+          "😮",
+          "🥰",
+          "❤️",
+          "🌟",
+          "🎭",
+          "🌈",
+        ];
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            const c = document.createElement("div");
+            c.className = "confetti";
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.fontSize = 20 + Math.random() * 20 + "px";
+            c.style.animationDuration = 2 + Math.random() * 3 + "s";
+            c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 5000);
+          }, i * 60);
+        }
+      }
+      function getAudioContext() {
+        try {
+          return (
+            window._audioCtx ||
+            (window._audioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )())
+          );
+        } catch (e) {
+          return null;
+        }
+      }
+      function playCheerSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        [1046, 1319, 1568].forEach((f, i) => {
+          const o = ctx.createOscillator(),
+            g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(f, now + i * 0.05);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + i * 0.05);
+          o.stop(now + 0.55);
+        });
+      }
+      function playOhSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(350, now);
+        o.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.7);
+      }
+      function playPling() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "triangle";
+        o.frequency.setValueAtTime(1320, now);
+        o.frequency.exponentialRampToValueAtTime(660, now + 0.12);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.28);
+      }
+      function showSuccessSplash(text) {
+        const s = document.createElement("div");
+        s.className = "success-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 800);
+      }
+      function showFailureSplash(text) {
+        const s = document.createElement("div");
+        s.className = "failure-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 1200);
+      }
+
+      showQuestion();
+    </script>
+  </body>
+</html>

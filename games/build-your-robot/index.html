@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Constrói o Teu Robot! - Build Your Robot!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #059669 0%, #0D9488 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .game-card { background: white; border-radius: 24px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { font-size: 2.5rem; text-align: center; margin-bottom: 8px; }
+        h2 { font-size: 1.2rem; text-align: center; color: #6B7280; margin-bottom: 24px; }
+        .robot-display { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 24px 0; padding: 24px; background: #ECFDF5; border-radius: 16px; }
+        .robot-row { display: flex; gap: 8px; justify-content: center; }
+        .robot-part { width: 65px; height: 65px; background: #D1FAE5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; transition: all 0.3s; border: 3px solid #A7F3D0; }
+        .robot-part.unlocked { background: #10B981; border-color: #059669; transform: scale(1.1); }
+        .robot-part.locked { opacity: 0.4; background: #E5E7EB; border-color: #D1D5DB; }
+        .question-box { background: #ECFDF5; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center; }
+        .question-emoji { font-size: 4rem; margin-bottom: 16px; }
+        .question-text { font-size: 1.5rem; font-weight: 700; color: #1F2937; margin-bottom: 8px; }
+        .question-hint { font-size: 1rem; color: #6B7280; }
+        .answers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 24px; }
+        .answer-btn { padding: 16px 24px; font-size: 1.2rem; font-weight: 600; border: 3px solid #E5E7EB; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .answer-btn:hover { border-color: #10B981; background: #ECFDF5; transform: translateY(-2px); }
+        .answer-btn.correct { background: #D1FAE5; border-color: #10B981; }
+        .answer-btn.wrong { background: #FEE2E2; border-color: #EF4444; }
+        .progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .stars { font-size: 1.5rem; }
+        .level-badge { background: #059669; color: white; padding: 8px 16px; border-radius: 20px; font-weight: 700; }
+        .celebration { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .celebration-content { background: white; border-radius: 24px; padding: 48px; text-align: center; max-width: 500px; }
+        .celebration h2 { font-size: 2rem; margin: 16px 0; }
+        .celebration .emoji { font-size: 5rem; }
+
+        /* Small transient success splash (for each correct answer) */
+        .success-splash { position: fixed; left: 50%; top: 18%; transform: translateX(-50%) translateY(-10px); background: linear-gradient(90deg, #10B981, #06B6D4); color: white; padding: 12px 24px; border-radius: 20px; font-weight: 800; font-size: 1.25rem; z-index: 200; opacity: 0; transition: all 0.35s cubic-bezier(.22,.9,.25,1); }
+        .success-splash.visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.05); }
+
+        .failure-splash { position: fixed; left: 50%; top: 18%; transform: translateX(-50%) translateY(-10px); background: linear-gradient(90deg,#EF4444,#F97316); color:white; padding:12px 24px; border-radius:20px; font-weight:800; z-index:200; opacity:0; transition: all 0.35s cubic-bezier(.22,.9,.25,1); }
+        .failure-splash.visible { opacity:1; transform: translateX(-50%) translateY(0) scale(1.05); }
+
+        .unlock-notice { position: fixed; left:50%; top:12%; transform: translateX(-50%) translateY(-12px); background: #111827; color: white; padding: 14px 20px; border-radius: 12px; z-index: 210; opacity:0; transition: all .35s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: none; }
+        .unlock-notice.visible { opacity:1; transform: translateX(-50%) translateY(0) scale(1.02); }
+        .play-btn { background: #059669; color: white; border: none; padding: 16px 48px; font-size: 1.2rem; font-weight: 700; border-radius: 12px; cursor: pointer; font-family: inherit; margin-top: 16px; }
+        .play-btn:hover { background: #047857; }
+        .hidden { display: none !important; }
+        .score-display { text-align: center; font-size: 1.1rem; color: #4B5563; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-card">
+            <h1>🤖 Constrói o Teu Robot!</h1>
+            <h2>Build Your Robot!</h2>
+            
+            <div class="progress">
+                <span class="stars" id="stars">⭐⭐⭐⭐⭐</span>
+                <span class="level-badge" id="level">Nível 1</span>
+            </div>
+            <div class="score-display">Peças: <span id="parts">0</span>/6</div>
+            
+            <div class="robot-display">
+                <div class="robot-row">
+                    <div class="robot-part locked" id="part-0">🤖</div>
+                </div>
+                <div class="robot-row">
+                    <div class="robot-part locked" id="part-1">🦾</div>
+                    <div class="robot-part locked" id="part-2">🦾</div>
+                </div>
+                <div class="robot-row">
+                    <div class="robot-part locked" id="part-3">⚙️</div>
+                </div>
+                <div class="robot-row">
+                    <div class="robot-part locked" id="part-4">🦿</div>
+                    <div class="robot-part locked" id="part-5">🦿</div>
+                </div>
+            </div>
+            
+            <div class="question-box">
+                <div class="question-emoji" id="emoji">🎨</div>
+                <div class="question-text" id="question">Loading...</div>
+                <div class="question-hint" id="hint"></div>
+            </div>
+            
+            <div class="answers" id="answers"></div>
+        </div>
+    </div>
+    
+    <div class="celebration hidden" id="celebration">
+        <div class="celebration-content">
+            <div class="emoji">🎉🤖🎉</div>
+            <h2>Parabéns! Congratulations!</h2>
+            <p>O teu robot está pronto! Your robot is ready!</p>
+            <button class="play-btn" onclick="location.reload()">Jogar Novamente / Play Again</button>
+        </div>
+    </div>
+    
+    <script src="../game-firebase.js"></script>
+    <script>
+        const levels = [
+            { theme: 'Cores', questions: [
+                { emoji: '🟢', q: 'Que cor é esta?', hint: 'What color?', answer: 'Verde', options: ['Azul', 'Verde', 'Amarelo', 'Vermelho'] },
+                { emoji: '🟣', q: 'Que cor é esta?', hint: 'What color?', answer: 'Roxo', options: ['Rosa', 'Roxo', 'Azul', 'Vermelho'] },
+                { emoji: '🟠', q: 'Que cor é esta?', hint: 'What color?', answer: 'Laranja', options: ['Amarelo', 'Vermelho', 'Laranja', 'Rosa'] }
+            ]},
+            { theme: 'Opostos', questions: [
+                { emoji: '🔥', q: 'O fogo é...', hint: 'Fire is...', answer: 'Quente', options: ['Frio', 'Quente', 'Morno', 'Gelado'] },
+                { emoji: '🧊', q: 'O gelo é...', hint: 'Ice is...', answer: 'Frio', options: ['Quente', 'Frio', 'Morno', 'Quente'] },
+                { emoji: '🌞', q: 'De dia está...', hint: 'During the day it is...', answer: 'Claro', options: ['Escuro', 'Claro', 'Cinzento', 'Preto'] }
+            ]},
+            { theme: 'Emoções', questions: [
+                { emoji: '😊', q: 'Como está?', hint: 'How is he feeling?', answer: 'Feliz', options: ['Triste', 'Feliz', 'Zangado', 'Assustado'] },
+                { emoji: '😢', q: 'Como está?', hint: 'How is she feeling?', answer: 'Triste', options: ['Feliz', 'Triste', 'Contente', 'Calmo'] },
+                { emoji: '😠', q: 'Como está?', hint: 'How is he feeling?', answer: 'Zangado', options: ['Feliz', 'Triste', 'Zangado', 'Cansado'] }
+            ]},
+            { theme: 'Instrumentos', questions: [
+                { emoji: '🎸', q: 'O que é isto?', hint: 'What is this?', answer: 'Guitarra', options: ['Piano', 'Guitarra', 'Violino', 'Flauta'] },
+                { emoji: '🎹', q: 'O que é isto?', hint: 'What is this?', answer: 'Piano', options: ['Piano', 'Guitarra', 'Bateria', 'Trompete'] },
+                { emoji: '🥁', q: 'O que é isto?', hint: 'What is this?', answer: 'Bateria', options: ['Guitarra', 'Piano', 'Bateria', 'Tambor'] }
+            ]},
+            { theme: 'Desportos', questions: [
+                { emoji: '⚽', q: 'Que desporto?', hint: 'What sport?', answer: 'Futebol', options: ['Basquetebol', 'Futebol', 'Ténis', 'Voleibol'] },
+                { emoji: '🏀', q: 'Que desporto?', hint: 'What sport?', answer: 'Basquetebol', options: ['Futebol', 'Basquetebol', 'Andebol', 'Rugby'] },
+                { emoji: '🎾', q: 'Que desporto?', hint: 'What sport?', answer: 'Ténis', options: ['Badminton', 'Golfe', 'Ténis', 'Pingue-pongue'] }
+            ]},
+            { theme: 'Escola', questions: [
+                { emoji: '📚', q: 'O que são?', hint: 'What are these?', answer: 'Livros', options: ['Cadernos', 'Livros', 'Revistas', 'Jornais'] },
+                { emoji: '✏️', q: 'O que é isto?', hint: 'What is this?', answer: 'Lápis', options: ['Caneta', 'Lápis', 'Marcador', 'Giz'] },
+                { emoji: '🎒', q: 'O que é isto?', hint: 'What is this?', answer: 'Mochila', options: ['Saco', 'Mala', 'Mochila', 'Bolsa'] }
+            ]}
+        ];
+        
+        let currentLevel = 0, currentQ = 0, stars = 5, parts = 0;
+        const partNames = ['Head','Torso','Left Arm','Right Arm','Left Leg','Right Leg'];
+        
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+        
+        function showQuestion() {
+            const level = levels[currentLevel];
+            const q = level.questions[currentQ];
+            document.getElementById('level').textContent = 'Nível ' + (currentLevel + 1) + ': ' + level.theme;
+            document.getElementById('emoji').textContent = q.emoji;
+            document.getElementById('question').textContent = q.q;
+            document.getElementById('hint').textContent = q.hint;
+            
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+            shuffle([...q.options]).forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = opt;
+                btn.disabled = false; // ensure buttons are enabled
+                btn.onclick = () => checkAnswer(opt, q.answer, btn);
+                answersDiv.appendChild(btn);
+            });
+        }
+        
+        function checkAnswer(selected, correct, btn) {
+            const btns = document.querySelectorAll('.answer-btn');
+            btns.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                btn.classList.add('correct');
+                // schedule progression first so audio/UI errors cannot block the game
+                setTimeout(() => nextQuestion(), 800);
+                try { playCheerSound(); } catch(e) { /* ignore audio errors */ }
+                try { showSuccessSplash('Parabéns! 🎉'); } catch(e) { /* ignore UI errors */ }
+            } else {
+                btn.classList.add('wrong');
+                // schedule progression even if sound/UI fails
+                setTimeout(() => nextQuestion(), 1500);
+                try { playOhSound(); } catch(e) { /* ignore audio errors */ }
+                stars = Math.max(0, stars - 1);
+                document.getElementById('stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(5 - stars);
+                btns.forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+                try { showFailureSplash('Ohhhh...'); } catch(e) { /* ignore UI errors */ }
+            }
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            if (currentQ >= levels[currentLevel].questions.length) {
+                const unlockedPart = partNames[currentLevel];
+                document.getElementById('part-' + currentLevel).classList.remove('locked');
+                document.getElementById('part-' + currentLevel).classList.add('unlocked');
+                parts++;
+                document.getElementById('parts').textContent = parts;
+                playPling();
+                currentLevel++;
+                currentQ = 0;
+                if (currentLevel >= levels.length) {
+                    // Save completion to cloud
+                    if (window.GameFirebase && window.GameFirebase.ready) {
+                        window.GameFirebase.saveProgress({ completed: true, stars: stars, parts: parts, levelsCompleted: currentLevel });
+                    }
+                    document.getElementById('celebration').classList.remove('hidden');
+                    return;
+                }
+            }
+            showQuestion();
+        }
+        
+        showQuestion();
+        
+        // Audio utilities and helpers
+        function getAudioContext() { try { return window._audioCtx || (window._audioCtx = new (window.AudioContext || window.webkitAudioContext)()); } catch(e) { return null; } }
+        function playCheerSound() { const ctx=getAudioContext(); if(!ctx) return; if(ctx.state==='suspended'&&typeof ctx.resume==='function'){ctx.resume().catch(()=>{});} const now=ctx.currentTime; const freqs=[1046,1319,1568]; const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,now); g.gain.exponentialRampToValueAtTime(0.35,now+0.05); g.gain.exponentialRampToValueAtTime(0.0001,now+0.6); g.connect(ctx.destination); freqs.forEach((f,i)=>{const o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(f,now+i*0.05); o.connect(g); o.start(now+i*0.05); o.stop(now+0.55);});}
+        function playOhSound() { const ctx=getAudioContext(); if(!ctx) return; if(ctx.state==='suspended'&&typeof ctx.resume==='function'){ctx.resume().catch(()=>{});} const now=ctx.currentTime; const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(350,now); o.frequency.exponentialRampToValueAtTime(150,now+0.5); g.gain.setValueAtTime(0.0001,now); g.gain.exponentialRampToValueAtTime(0.3,now+0.05); g.gain.exponentialRampToValueAtTime(0.0001,now+0.7); o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now+0.7);}
+        function playPling() { const ctx=getAudioContext(); if(!ctx) return; const now=ctx.currentTime; const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(1320, now); o.frequency.exponentialRampToValueAtTime(660, now+0.12); g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.25, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.3); o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now+0.28); }
+        function showFailureSplash(text='Ohhhh...') { const s=document.createElement('div'); s.className='failure-splash'; s.textContent=text; document.body.appendChild(s); requestAnimationFrame(()=>s.classList.add('visible')); setTimeout(()=>{ s.classList.remove('visible'); setTimeout(()=>s.remove(),400); },1200); }
+    </script>
+</body>
+</html>

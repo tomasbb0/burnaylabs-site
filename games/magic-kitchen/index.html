@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🧑‍🍳 A Cozinha Mágica! - Magic Kitchen!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Nunito", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f97316 0%,
+          #dc2626 50%,
+          #9333ea 100%
+        );
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .game-card {
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        font-size: 2.2rem;
+        text-align: center;
+        margin-bottom: 4px;
+        color: #9a3412;
+      }
+      h2 {
+        font-size: 1.1rem;
+        text-align: center;
+        color: #c2410c;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      .kitchen-display {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+        padding: 24px;
+        background: linear-gradient(135deg, #fde68a, #fcd34d);
+        border-radius: 16px;
+        position: relative;
+      }
+      .kitchen-shelf {
+        width: 100%;
+        height: 4px;
+        background: #92400e;
+        border-radius: 2px;
+        margin: 4px 0;
+      }
+      .food-item {
+        width: 72px;
+        height: 72px;
+        background: #fef3c7;
+        border: 3px dashed #d97706;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .food-item.unlocked {
+        background: white;
+        border: 3px solid #f59e0b;
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        animation: foodPop 0.6s ease;
+      }
+      .food-item.locked {
+        opacity: 0.2;
+        filter: grayscale(1);
+        border-style: dashed;
+      }
+      @keyframes foodPop {
+        0% {
+          transform: scale(0) rotate(-20deg);
+        }
+        50% {
+          transform: scale(1.2) rotate(5deg);
+        }
+        100% {
+          transform: scale(1.1) rotate(0);
+        }
+      }
+      .recipe-card {
+        background: #fffbeb;
+        border: 2px solid #fbbf24;
+        border-radius: 16px;
+        padding: 16px;
+        margin: 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .recipe-title {
+        font-weight: 800;
+        color: #92400e;
+      }
+      .recipe-items {
+        display: flex;
+        gap: 4px;
+        font-size: 1.5rem;
+      }
+      .recipe-items span {
+        opacity: 0.2;
+        transition: opacity 0.3s;
+      }
+      .recipe-items span.collected {
+        opacity: 1;
+      }
+      .question-box {
+        background: linear-gradient(135deg, #fff7ed, #ffedd5);
+        border-radius: 16px;
+        padding: 24px;
+        margin: 20px 0;
+        text-align: center;
+        border: 3px solid #fb923c;
+      }
+      .question-emoji {
+        font-size: 4.5rem;
+        margin-bottom: 12px;
+        animation: sizzle 0.5s ease-in-out infinite alternate;
+      }
+      @keyframes sizzle {
+        from {
+          transform: rotate(-3deg);
+        }
+        to {
+          transform: rotate(3deg);
+        }
+      }
+      .question-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #7c2d12;
+        margin-bottom: 6px;
+      }
+      .question-hint {
+        font-size: 1rem;
+        color: #9a3412;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .answer-btn {
+        padding: 18px;
+        font-size: 1.15rem;
+        font-weight: 700;
+        border: 3px solid #fed7aa;
+        border-radius: 16px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+      }
+      .answer-btn:hover {
+        border-color: #f97316;
+        background: #fff7ed;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(249, 115, 22, 0.2);
+      }
+      .answer-btn.correct {
+        background: #d1fae5;
+        border-color: #10b981;
+        animation: correctPop 0.4s ease;
+      }
+      .answer-btn.wrong {
+        background: #fee2e2;
+        border-color: #ef4444;
+        animation: wrongShake 0.4s ease;
+      }
+      @keyframes correctPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .stars {
+        font-size: 1.4rem;
+      }
+      .level-badge {
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 800;
+      }
+      .score-display {
+        text-align: center;
+        font-size: 1rem;
+        color: #6b7280;
+        margin-bottom: 8px;
+      }
+      .celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .celebration-content {
+        background: linear-gradient(135deg, #ea580c 0%, #f59e0b 100%);
+        border-radius: 24px;
+        padding: 48px;
+        text-align: center;
+        max-width: 500px;
+        color: white;
+        animation: celebPop 0.5s ease;
+      }
+      @keyframes celebPop {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .celebration h2 {
+        font-size: 2rem;
+        margin: 16px 0;
+        color: white;
+      }
+      .celebration .emoji {
+        font-size: 5rem;
+      }
+      .play-btn {
+        background: white;
+        color: #ea580c;
+        border: none;
+        padding: 16px 48px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 16px;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .confetti {
+        position: fixed;
+        top: -10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        z-index: 150;
+        animation: confettiFall linear forwards;
+        pointer-events: none;
+      }
+      @keyframes confettiFall {
+        to {
+          top: 110vh;
+          transform: rotate(720deg);
+        }
+      }
+      .success-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .success-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .failure-splash {
+        position: fixed;
+        left: 50%;
+        top: 18%;
+        transform: translateX(-50%) translateY(-10px);
+        background: linear-gradient(90deg, #ef4444, #f97316);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        z-index: 200;
+        opacity: 0;
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.25, 1);
+      }
+      .failure-splash.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+      }
+      .steam {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: steamRise 2s ease-out infinite;
+        pointer-events: none;
+      }
+      @keyframes steamRise {
+        0% {
+          transform: translateY(0) scale(1);
+          opacity: 0.6;
+        }
+        100% {
+          transform: translateY(-60px) scale(2);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="game-card">
+        <h1>🧑‍🍳 A Cozinha Mágica!</h1>
+        <h2>Magic Kitchen! — Learn food in Portuguese</h2>
+
+        <div class="progress">
+          <span class="stars" id="stars">⭐⭐⭐⭐⭐</span>
+          <span class="level-badge" id="level">Recipe 1</span>
+        </div>
+        <div class="score-display">
+          Ingredientes: <span id="parts">0</span>/6
+        </div>
+
+        <div class="kitchen-display">
+          <div class="food-item locked" id="part-0">🍎</div>
+          <div class="food-item locked" id="part-1">🥛</div>
+          <div class="food-item locked" id="part-2">🍞</div>
+          <div class="food-item locked" id="part-3">🧀</div>
+          <div class="food-item locked" id="part-4">🥚</div>
+          <div class="food-item locked" id="part-5">🍰</div>
+        </div>
+
+        <div class="question-box">
+          <div class="question-emoji" id="emoji">🍎</div>
+          <div class="question-text" id="question">Loading...</div>
+          <div class="question-hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+      </div>
+    </div>
+
+    <div class="celebration hidden" id="celebration">
+      <div class="celebration-content">
+        <div class="emoji">🧑‍🍳🍰🎉</div>
+        <h2>O bolo está pronto!</h2>
+        <p>The cake is ready! You're a master chef!</p>
+        <button class="play-btn" onclick="location.reload()">
+          🧑‍🍳 Cozinhar Novamente / Cook Again
+        </button>
+      </div>
+    </div>
+
+    <script src="../game-firebase.js"></script>
+    <script>
+      const levels = [
+        {
+          theme: "Frutas / Fruits",
+          questions: [
+            {
+              emoji: "🍎",
+              q: "Que fruta é esta?",
+              hint: "What fruit? (red, crunchy)",
+              answer: "Maçã",
+              options: ["Banana", "Maçã", "Laranja", "Uva"],
+            },
+            {
+              emoji: "🍌",
+              q: "Que fruta é esta?",
+              hint: "What fruit? (yellow, curved)",
+              answer: "Banana",
+              options: ["Banana", "Limão", "Manga", "Ananás"],
+            },
+            {
+              emoji: "🍊",
+              q: "Que fruta é esta?",
+              hint: "What fruit? (orange, juicy)",
+              answer: "Laranja",
+              options: ["Maçã", "Limão", "Laranja", "Tangerina"],
+            },
+          ],
+        },
+        {
+          theme: "Bebidas / Drinks",
+          questions: [
+            {
+              emoji: "🥛",
+              q: "O que é isto?",
+              hint: "What is this? (white, from cows)",
+              answer: "Leite",
+              options: ["Água", "Leite", "Sumo", "Iogurte"],
+            },
+            {
+              emoji: "💧",
+              q: "O que bebemos sempre?",
+              hint: "What do we always drink?",
+              answer: "Água",
+              options: ["Água", "Sumo", "Leite", "Chá"],
+            },
+            {
+              emoji: "🧃",
+              q: "O que é isto?",
+              hint: "What is this? (sweet, from fruit)",
+              answer: "Sumo",
+              options: ["Leite", "Água", "Sumo", "Café"],
+            },
+          ],
+        },
+        {
+          theme: "Pão e Cereais / Bread",
+          questions: [
+            {
+              emoji: "🍞",
+              q: "O que é isto?",
+              hint: "What is this? (baked, sliced)",
+              answer: "Pão",
+              options: ["Bolo", "Pão", "Bolacha", "Tosta"],
+            },
+            {
+              emoji: "🥐",
+              q: "O que comemos ao pequeno-almoço?",
+              hint: "What do we eat for breakfast? (French pastry)",
+              answer: "Croissant",
+              options: ["Pão", "Croissant", "Bolo", "Pizza"],
+            },
+            {
+              emoji: "🍪",
+              q: "O que é isto?",
+              hint: "What is this? (sweet, crunchy)",
+              answer: "Bolacha",
+              options: ["Pão", "Bolo", "Bolacha", "Tosta"],
+            },
+          ],
+        },
+        {
+          theme: "Laticínios / Dairy",
+          questions: [
+            {
+              emoji: "🧀",
+              q: "O que é isto?",
+              hint: "What is this? (yellow, holes)",
+              answer: "Queijo",
+              options: ["Manteiga", "Queijo", "Iogurte", "Natas"],
+            },
+            {
+              emoji: "🧈",
+              q: "O que pomos no pão?",
+              hint: "What do we put on bread?",
+              answer: "Manteiga",
+              options: ["Queijo", "Manteiga", "Mel", "Doce"],
+            },
+            {
+              emoji: "🥣",
+              q: "O que é isto?",
+              hint: "What is this? (creamy, with fruit)",
+              answer: "Iogurte",
+              options: ["Leite", "Iogurte", "Sopa", "Gelado"],
+            },
+          ],
+        },
+        {
+          theme: "Proteínas / Proteins",
+          questions: [
+            {
+              emoji: "🥚",
+              q: "O que é isto?",
+              hint: "What is this? (from chickens)",
+              answer: "Ovo",
+              options: ["Bola", "Ovo", "Queijo", "Batata"],
+            },
+            {
+              emoji: "🍗",
+              q: "O que é isto?",
+              hint: "What is this? (meat, from chicken)",
+              answer: "Frango",
+              options: ["Peixe", "Frango", "Porco", "Vaca"],
+            },
+            {
+              emoji: "🐟",
+              q: "O que é isto?",
+              hint: "What is this? (from the sea)",
+              answer: "Peixe",
+              options: ["Frango", "Carne", "Peixe", "Camarão"],
+            },
+          ],
+        },
+        {
+          theme: "Sobremesas / Desserts",
+          questions: [
+            {
+              emoji: "🍰",
+              q: "O que é isto?",
+              hint: "What is this? (sweet, birthday)",
+              answer: "Bolo",
+              options: ["Pão", "Bolo", "Tarte", "Pudim"],
+            },
+            {
+              emoji: "🍦",
+              q: "O que comemos quando está calor?",
+              hint: "What do we eat when it's hot?",
+              answer: "Gelado",
+              options: ["Sopa", "Gelado", "Chá", "Bolo"],
+            },
+            {
+              emoji: "🍫",
+              q: "O que é isto?",
+              hint: "What is this? (brown, sweet)",
+              answer: "Chocolate",
+              options: ["Café", "Chocolate", "Caramelo", "Noz"],
+            },
+          ],
+        },
+      ];
+
+      let currentLevel = 0,
+        currentQ = 0,
+        stars = 5,
+        parts = 0;
+
+      function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+      }
+
+      function showQuestion() {
+        const level = levels[currentLevel];
+        const q = level.questions[currentQ];
+        document.getElementById("level").textContent =
+          "Recipe " + (currentLevel + 1) + ": " + level.theme;
+        document.getElementById("emoji").textContent = q.emoji;
+        document.getElementById("question").textContent = q.q;
+        document.getElementById("hint").textContent = q.hint;
+
+        const answersDiv = document.getElementById("answers");
+        answersDiv.innerHTML = "";
+        shuffle(q.options).forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "answer-btn";
+          btn.textContent = opt;
+          btn.disabled = false;
+          btn.onclick = () => checkAnswer(opt, q.answer, btn);
+          answersDiv.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected, correct, btn) {
+        const btns = document.querySelectorAll(".answer-btn");
+        btns.forEach((b) => (b.disabled = true));
+
+        if (selected === correct) {
+          btn.classList.add("correct");
+          setTimeout(() => nextQuestion(), 800);
+          try {
+            playCheerSound();
+          } catch (e) {}
+          try {
+            showSuccessSplash("Delicioso! 😋");
+          } catch (e) {}
+        } else {
+          btn.classList.add("wrong");
+          setTimeout(() => nextQuestion(), 1500);
+          try {
+            playOhSound();
+          } catch (e) {}
+          stars = Math.max(0, stars - 1);
+          document.getElementById("stars").textContent =
+            "⭐".repeat(stars) + "☆".repeat(5 - stars);
+          btns.forEach((b) => {
+            if (b.textContent === correct) b.classList.add("correct");
+          });
+          try {
+            showFailureSplash("Queimou! 🔥");
+          } catch (e) {}
+        }
+      }
+
+      function nextQuestion() {
+        currentQ++;
+        if (currentQ >= levels[currentLevel].questions.length) {
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.remove("locked");
+          document
+            .getElementById("part-" + currentLevel)
+            .classList.add("unlocked");
+          parts++;
+          document.getElementById("parts").textContent = parts;
+          try {
+            playPling();
+          } catch (e) {}
+          currentLevel++;
+          currentQ = 0;
+          if (currentLevel >= levels.length) {
+            // Save completion to cloud
+            if (window.GameFirebase && window.GameFirebase.ready) {
+              window.GameFirebase.saveProgress({ completed: true, stars: stars, parts: parts, levelsCompleted: currentLevel });
+            }
+            launchConfetti();
+            setTimeout(
+              () =>
+                document
+                  .getElementById("celebration")
+                  .classList.remove("hidden"),
+              500,
+            );
+            return;
+          }
+        }
+        showQuestion();
+      }
+
+      function launchConfetti() {
+        const emojis = [
+          "🍎",
+          "🍌",
+          "🍊",
+          "🧀",
+          "🍞",
+          "🍰",
+          "🥛",
+          "🍪",
+          "🥚",
+          "🍫",
+        ];
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            const c = document.createElement("div");
+            c.style.cssText =
+              "position:fixed;top:-20px;font-size:" +
+              (16 + Math.random() * 20) +
+              "px;z-index:150;pointer-events:none;left:" +
+              Math.random() * 100 +
+              "vw;animation:confettiFall " +
+              (2 + Math.random() * 3) +
+              "s linear forwards;";
+            c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 5000);
+          }, i * 60);
+        }
+      }
+      function getAudioContext() {
+        try {
+          return (
+            window._audioCtx ||
+            (window._audioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )())
+          );
+        } catch (e) {
+          return null;
+        }
+      }
+      function playCheerSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        [1046, 1319, 1568].forEach((f, i) => {
+          const o = ctx.createOscillator(),
+            g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(f, now + i * 0.05);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(now + i * 0.05);
+          o.stop(now + 0.55);
+        });
+      }
+      function playOhSound() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(350, now);
+        o.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.7);
+      }
+      function playPling() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const o = ctx.createOscillator(),
+          g = ctx.createGain();
+        o.type = "triangle";
+        o.frequency.setValueAtTime(1320, now);
+        o.frequency.exponentialRampToValueAtTime(660, now + 0.12);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.28);
+      }
+      function showSuccessSplash(text) {
+        const s = document.createElement("div");
+        s.className = "success-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 800);
+      }
+      function showFailureSplash(text) {
+        const s = document.createElement("div");
+        s.className = "failure-splash";
+        s.textContent = text;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => s.classList.add("visible"));
+        setTimeout(() => {
+          s.classList.remove("visible");
+          setTimeout(() => s.remove(), 400);
+        }, 1200);
+      }
+
+      showQuestion();
+    </script>
+  </body>
+</html>
